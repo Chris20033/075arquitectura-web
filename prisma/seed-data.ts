@@ -22,7 +22,8 @@ export async function seedDatabase(
     where: { singletonKey: "default" },
     update: {
       professionalName: "075arquitectura — perfil de demostración",
-      biography: "Contenido ficticio para desarrollo y pruebas.",
+      biography:
+        "Estudio de demostración enfocado en espacios contemporáneos, materialidad honesta y una lectura atenta de cada contexto.",
       whatsappPhone: "+520000000000",
       publicEmail: "contacto@075arquitectura.test",
       publicPhone: "+520000000000",
@@ -30,7 +31,8 @@ export async function seedDatabase(
     create: {
       singletonKey: "default",
       professionalName: "075arquitectura — perfil de demostración",
-      biography: "Contenido ficticio para desarrollo y pruebas.",
+      biography:
+        "Estudio de demostración enfocado en espacios contemporáneos, materialidad honesta y una lectura atenta de cada contexto.",
       whatsappPhone: "+520000000000",
       publicEmail: "contacto@075arquitectura.test",
       publicPhone: "+520000000000",
