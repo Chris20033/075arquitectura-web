@@ -13,6 +13,11 @@ enum ProjectStatus {
   PUBLISHED
 }
 
+enum LoginThrottleScope {
+  ACCOUNT
+  CLIENT
+}
+
 model AdminUser {
   id                String    @id @default(dbgenerated("uuidv7()")) @db.Uuid
   singletonKey      String    @unique @default("owner") @map("singleton_key") @db.VarChar(32)
@@ -118,3 +123,16 @@ model ProjectImage {
   @@map("project_images")
 }
 
+model LoginThrottle {
+  scope           LoginThrottleScope
+  keyHash         String             @map("key_hash") @db.Char(64)
+  failures        Int                @default(0)
+  windowStartedAt DateTime           @map("window_started_at") @db.Timestamptz(3)
+  blockedUntil    DateTime?          @map("blocked_until") @db.Timestamptz(3)
+  createdAt       DateTime           @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt       DateTime           @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  @@id([scope, keyHash])
+  @@index([updatedAt], map: "login_throttles_updated_at_idx")
+  @@map("login_throttles")
+}

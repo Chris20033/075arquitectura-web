@@ -10,6 +10,7 @@ export async function seedDatabase(
   options: { mode: SeedMode; reset?: boolean },
 ) {
   if (options.reset) {
+    await database.loginThrottle.deleteMany();
     await database.project.deleteMany();
     await database.category.deleteMany();
     await database.socialLink.deleteMany();
@@ -224,6 +225,9 @@ export async function seedDatabase(
   if (options.mode === "test") {
     const passwordHash = await argon2.hash("test-only-password-123!", {
       type: argon2.argon2id,
+      memoryCost: 19_456,
+      timeCost: 2,
+      parallelism: 1,
     });
 
     await database.adminUser.upsert({
