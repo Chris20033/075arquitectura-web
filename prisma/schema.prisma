@@ -1,0 +1,120 @@
+generator client {
+  provider        = "prisma-client"
+  output          = "../generated/prisma"
+  previewFeatures = ["partialIndexes"]
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum ProjectStatus {
+  DRAFT
+  PUBLISHED
+}
+
+model AdminUser {
+  id                String    @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  singletonKey      String    @unique @default("owner") @map("singleton_key") @db.VarChar(32)
+  email             String    @unique @db.VarChar(320)
+  passwordHash      String    @map("password_hash") @db.Text
+  isActive          Boolean   @default(true) @map("is_active")
+  lastLoginAt       DateTime? @map("last_login_at") @db.Timestamptz(3)
+  passwordChangedAt DateTime  @default(now()) @map("password_changed_at") @db.Timestamptz(3)
+  createdAt         DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt         DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  @@map("admin_users")
+}
+
+model SiteProfile {
+  id               String       @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  singletonKey     String       @unique @default("default") @map("singleton_key") @db.VarChar(32)
+  professionalName String       @default("") @map("professional_name") @db.VarChar(160)
+  biography        String?      @db.Text
+  whatsappPhone    String?      @map("whatsapp_phone") @db.VarChar(32)
+  publicEmail      String?      @map("public_email") @db.VarChar(320)
+  publicPhone      String?      @map("public_phone") @db.VarChar(32)
+  createdAt        DateTime     @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt        DateTime     @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(3)
+  socialLinks      SocialLink[]
+
+  @@map("site_profiles")
+}
+
+model SocialLink {
+  id            String      @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  siteProfileId String      @map("site_profile_id") @db.Uuid
+  label         String      @db.VarChar(80)
+  url           String      @db.Text
+  position      Int
+  isVisible     Boolean     @default(true) @map("is_visible")
+  createdAt     DateTime    @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt     DateTime    @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(3)
+  siteProfile   SiteProfile @relation(fields: [siteProfileId], references: [id], onDelete: Cascade)
+
+  @@unique([siteProfileId, position], map: "social_links_profile_position_key")
+  @@map("social_links")
+}
+
+model Category {
+  id             String    @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  name           String    @db.VarChar(120)
+  normalizedName String    @unique @map("normalized_name") @db.VarChar(120)
+  slug           String    @unique @db.VarChar(140)
+  position       Int       @unique
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt      DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(3)
+  projects       Project[]
+
+  @@map("categories")
+}
+
+model Project {
+  id          String         @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  categoryId  String         @map("category_id") @db.Uuid
+  name        String         @db.VarChar(180)
+  slug        String         @unique @db.VarChar(200)
+  description String?        @db.Text
+  year        Int?           @db.SmallInt
+  location    String?        @db.VarChar(180)
+  status      ProjectStatus  @default(DRAFT)
+  position    Int
+  publishedAt DateTime?      @map("published_at") @db.Timestamptz(3)
+  deletedAt   DateTime?      @map("deleted_at") @db.Timestamptz(3)
+  createdAt   DateTime       @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt   DateTime       @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(3)
+  category    Category       @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  images      ProjectImage[]
+
+  @@unique([position], map: "projects_public_position_key", where: raw("status = 'PUBLISHED' AND deleted_at IS NULL"))
+  @@index([status, deletedAt, position], map: "projects_public_listing_idx")
+  @@index([categoryId], map: "projects_category_id_idx")
+  @@index([deletedAt], map: "projects_deleted_at_idx")
+  @@map("projects")
+}
+
+model ProjectImage {
+  id                 String   @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  projectId          String   @map("project_id") @db.Uuid
+  cloudinaryAssetId  String   @unique @map("cloudinary_asset_id") @db.VarChar(255)
+  cloudinaryPublicId String   @unique @map("cloudinary_public_id") @db.VarChar(255)
+  cloudinaryVersion  BigInt   @map("cloudinary_version")
+  secureUrl          String   @map("secure_url") @db.Text
+  format             String   @db.VarChar(32)
+  width              Int
+  height             Int
+  bytes              BigInt
+  altText            String?  @map("alt_text") @db.VarChar(500)
+  position           Int
+  isCover            Boolean  @default(false) @map("is_cover")
+  createdAt          DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt          DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(3)
+  project            Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, position], map: "project_images_project_position_key")
+  @@unique([projectId], map: "project_images_one_cover_key", where: { isCover: true })
+  @@index([projectId], map: "project_images_project_id_idx")
+  @@map("project_images")
+}
+

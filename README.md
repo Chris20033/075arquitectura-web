@@ -1,36 +1,96 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 075arquitectura
 
-## Getting Started
+Aplicación integral en Next.js para el portafolio público y la futura administración privada de 075arquitectura. Este repositorio contiene la base técnica y de persistencia del Sprint 2; todavía no incluye autenticación, CRUD, API pública ni el rediseño visual.
 
-First, run the development server:
+## Requisitos
+
+- Node.js `24.11.0` (ver `.nvmrc`).
+- npm `11.6.1`.
+- Docker con Compose para PostgreSQL local.
+
+Las versiones de Next.js, Prisma y demás paquetes están bloqueadas en `package-lock.json`. Instala siempre con:
+
+```bash
+npm ci
+```
+
+## Configuración local
+
+1. Copia `.env.example` como `.env`.
+2. Conserva las URLs locales incluidas o cambia únicamente las credenciales de desarrollo.
+3. Inicia PostgreSQL:
+
+```bash
+docker compose up -d postgres postgres-test
+```
+
+4. Prepara la base de desarrollo:
+
+```bash
+npm run db:migrate:deploy
+npm run db:seed
+```
+
+5. Inicia Next.js:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+La aplicación queda disponible en `http://localhost:3000`. PostgreSQL de desarrollo escucha solo en `127.0.0.1:5432`; la instancia de pruebas, solo en `127.0.0.1:5433`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Flujo reproducible del Sprint 2
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Con los dos servicios de PostgreSQL saludables y el archivo `.env` creado:
 
-## Learn More
+```bash
+npm ci
+npm run db:migrate:deploy
+npm run db:seed
+npm run check
+npm run db:status
+```
 
-To learn more about Next.js, take a look at the following resources:
+`npm run check` comprueba formato, lint, tipos, integración contra una base de pruebas reiniciada y el build de producción. El reset de pruebas se niega a operar salvo que la URL use `localhost` o `127.0.0.1`, el puerto `5433` y un nombre terminado en `_test`.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Base de datos
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- `npm run db:generate`: regenera el cliente Prisma en `generated/prisma`.
+- `npm run db:migrate`: crea/aplica migraciones durante desarrollo.
+- `npm run db:migrate:deploy`: aplica migraciones ya versionadas.
+- `npm run db:status`: muestra el estado de migraciones.
+- `npm run db:seed`: carga fixtures ficticios e idempotentes, sin administradora.
+- `npm run db:test:reset`: reconstruye y puebla exclusivamente la base de pruebas.
+- `npm run test:integration`: reconstruye la base de pruebas y ejecuta Vitest en serie.
 
-## Deploy on Vercel
+No se usa `prisma db push` como sustituto de las migraciones. Los metadatos de imágenes del seed son falsos, usan `example.invalid` y no realizan cargas a Cloudinary.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Creación privada de la administradora
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Define temporalmente `ADMIN_EMAIL` y `ADMIN_PASSWORD` en el entorno y ejecuta:
+
+```bash
+npm run db:bootstrap-admin
+```
+
+La contraseña debe tener entre 15 y 128 caracteres. El comando normaliza el correo, genera un hash Argon2id y rechaza sobrescribir la cuenta o crear una segunda administradora. Nunca imprime la contraseña ni el hash.
+
+## Seguridad
+
+- `.env` y todos los secretos reales están ignorados por Git.
+- Las credenciales de `compose.yaml` son exclusivamente locales y no son aptas para producción.
+- No reutilices contraseñas de producción en desarrollo o pruebas.
+- No apuntes `TEST_DATABASE_URL` a una base remota: el mecanismo de seguridad también lo rechazará.
+- El cliente Prisma compartido es exclusivo del servidor; no debe importarse desde componentes cliente.
+
+## Calidad
+
+```bash
+npm run format:check
+npm run lint
+npm run typecheck
+npm run test:integration
+npm run build
+```
+
+El formato puede corregirse con `npm run format`. La página inicial del scaffold se conserva intencionalmente hasta el sprint de sistema visual.
