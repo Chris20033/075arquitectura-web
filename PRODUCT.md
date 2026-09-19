@@ -29,7 +29,8 @@ La propietaria utilizará `/admin` desde escritorio y móvil para mantener conte
 - Existe una sola administradora creada mediante un comando privado.
 - No hay registro público ni recuperación automática de contraseña en el MVP.
 - Las sesiones duran como máximo ocho horas y se invalidan al cambiar la contraseña o desactivar la cuenta.
-- Los Sprints 6 y 7 implementarán la gestión de contenido e imágenes; el Sprint 3 entrega autenticación y shell.
+- La landing pública consume `SiteProfile` y muestra recursos conceptuales identificados como demo hasta recibir obra real.
+- Los Sprints 6 y 7 implementarán la gestión de contenido e imágenes; el Sprint 4 entrega el sistema visual público.
 
 ## Brand Commitments
 
@@ -52,4 +53,4 @@ La propietaria utilizará `/admin` desde escritorio y móvil para mantener conte
 
 ## Accessibility & Inclusion
 
-El panel debe funcionar con teclado, foco visible, contraste suficiente y una alternativa intencional para `prefers-reduced-motion`.
+El sitio público y el panel deben funcionar con teclado, foco visible, contraste suficiente y una alternativa intencional para `prefers-reduced-motion`.
