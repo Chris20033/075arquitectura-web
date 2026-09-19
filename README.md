@@ -1,6 +1,6 @@
 # 075arquitectura
 
-Aplicación integral en Next.js para el portafolio público y la futura administración privada de 075arquitectura. Este repositorio contiene la base técnica y de persistencia del Sprint 2; todavía no incluye autenticación, CRUD, API pública ni el rediseño visual.
+Aplicación integral en Next.js para el portafolio público y la administración privada de 075arquitectura. Incluye la base de persistencia, autenticación de propietaria y shell editorial de `/admin`. El CRUD de contenido y las galerías se implementarán en los Sprints 6 y 7.
 
 ## Requisitos
 
@@ -17,7 +17,7 @@ npm ci
 ## Configuración local
 
 1. Copia `.env.example` como `.env`.
-2. Conserva las URLs locales incluidas o cambia únicamente las credenciales de desarrollo.
+2. Conserva las URLs locales incluidas o cambia únicamente las credenciales de desarrollo. Define un `AUTH_SECRET` local aleatorio y deja `NEXTAUTH_URL=http://localhost:3000`.
 3. Inicia PostgreSQL:
 
 ```bash
@@ -39,7 +39,7 @@ npm run dev
 
 La aplicación queda disponible en `http://localhost:3000`. PostgreSQL de desarrollo escucha solo en `127.0.0.1:5432`; la instancia de pruebas, solo en `127.0.0.1:5433`.
 
-## Flujo reproducible del Sprint 2
+## Flujo reproducible
 
 Con los dos servicios de PostgreSQL saludables y el archivo `.env` creado:
 
@@ -75,6 +75,16 @@ npm run db:bootstrap-admin
 
 La contraseña debe tener entre 15 y 128 caracteres. El comando normaliza el correo, genera un hash Argon2id y rechaza sobrescribir la cuenta o crear una segunda administradora. Nunca imprime la contraseña ni el hash.
 
+## Panel administrativo
+
+- Acceso: `/admin/acceso`.
+- Sesión cifrada con duración absoluta de ocho horas.
+- El panel revalida en PostgreSQL que la cuenta siga activa y que la contraseña no haya cambiado.
+- El dashboard usa métricas reales; proyectos, categorías, perfil y papelera muestran estados de próximos sprints.
+- No existe registro público, recuperación automática ni API pública de negocio.
+
+El inicio y cierre de sesión usan NextAuth.js y protección CSRF. Los intentos fallidos se limitan en PostgreSQL mediante claves HMAC que no contienen el correo ni la IP legibles.
+
 ## Seguridad
 
 - `.env` y todos los secretos reales están ignorados por Git.
@@ -82,6 +92,7 @@ La contraseña debe tener entre 15 y 128 caracteres. El comando normaliza el cor
 - No reutilices contraseñas de producción en desarrollo o pruebas.
 - No apuntes `TEST_DATABASE_URL` a una base remota: el mecanismo de seguridad también lo rechazará.
 - El cliente Prisma compartido es exclusivo del servidor; no debe importarse desde componentes cliente.
+- En producción, el reverse proxy debe sobrescribir `X-Real-IP`/`X-Forwarded-For`, mantener privado el puerto de Next.js y servir HTTPS.
 
 ## Calidad
 
@@ -93,4 +104,4 @@ npm run test:integration
 npm run build
 ```
 
-El formato puede corregirse con `npm run format`. La página inicial del scaffold se conserva intencionalmente hasta el sprint de sistema visual.
+El formato puede corregirse con `npm run format`. La landing pública del scaffold se conserva intencionalmente hasta el sprint de sistema visual.

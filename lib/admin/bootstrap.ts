@@ -1,10 +1,8 @@
-import argon2 from "argon2";
-
 import type { DatabaseClient } from "@/lib/db/client";
 
+import { hashPassword, isPasswordLengthValid } from "@/lib/auth/password";
+
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const MIN_PASSWORD_LENGTH = 15;
-const MAX_PASSWORD_LENGTH = 128;
 
 export class AdminBootstrapError extends Error {
   constructor(
@@ -34,10 +32,7 @@ export async function bootstrapAdmin(
     );
   }
 
-  if (
-    input.password.length < MIN_PASSWORD_LENGTH ||
-    input.password.length > MAX_PASSWORD_LENGTH
-  ) {
+  if (!isPasswordLengthValid(input.password)) {
     throw new AdminBootstrapError(
       "INVALID_PASSWORD",
       "ADMIN_PASSWORD must contain between 15 and 128 characters.",
@@ -52,9 +47,7 @@ export async function bootstrapAdmin(
     );
   }
 
-  const passwordHash = await argon2.hash(input.password, {
-    type: argon2.argon2id,
-  });
+  const passwordHash = await hashPassword(input.password);
 
   return database.adminUser.create({
     data: {
