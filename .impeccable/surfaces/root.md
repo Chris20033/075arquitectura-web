@@ -8,9 +8,9 @@ Modo: Experience. Audiencia: visitantes que evalúan el trabajo y encaje del est
 
 **OWN-WORLD:** Papel mineral, negro arquitectónico y terracota; reglas finas, bordes rectos, una sola sans de gran escala y fotografía material con luz natural. Las acciones son tipográficas, no botones suaves.
 
-**STORY:** El visitante encuentra una práctica de arquitectura contemporánea, reconoce su atención al contexto, entiende servicios y proceso, y llega a un contacto confiable. Todo dato provisional se declara demo.
+**STORY:** El visitante entra por una obra, recorre el archivo en orden editorial, abre cada proyecto como una lámina independiente, reconoce la atención al contexto y llega a un contacto confiable. Todo dato provisional se declara demo.
 
-**FIRST VIEWPORT:** Una fotografía conceptual ocupa todo el alto. La marca 075 aparece monumental al centro, navegación distribuida arriba y notas disciplinares en los bordes. La entrada revela la marca y expande una regla terracota.
+**FIRST VIEWPORT:** La portada del primer proyecto público ocupa todo el alto. La marca 075 aparece monumental al centro, navegación distribuida arriba y notas disciplinares en los bordes. Sin proyectos live, el plano permanece oscuro y tipográfico; nunca simula obra real.
 
 **FORM:** One-page editorial portfolio, primera forma del orden acordado. Seed key: editorial-075-code-led.
 

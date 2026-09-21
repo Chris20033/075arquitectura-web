@@ -29,8 +29,9 @@ La propietaria utilizará `/admin` desde escritorio y móvil para mantener conte
 - Existe una sola administradora creada mediante un comando privado.
 - No hay registro público ni recuperación automática de contraseña en el MVP.
 - Las sesiones duran como máximo ocho horas y se invalidan al cambiar la contraseña o desactivar la cuenta.
-- La landing pública consume `SiteProfile` y muestra recursos conceptuales identificados como demo hasta recibir obra real.
-- Los Sprints 6 y 7 implementarán la gestión de contenido e imágenes; el Sprint 4 entrega el sistema visual público.
+- La landing pública consume `SiteProfile` y proyectos publicados; cada obra dispone de un detalle por slug.
+- Los recursos conceptuales permanecen identificados como demo hasta recibir obra real.
+- Los Sprints 6 y 7 implementarán la gestión de contenido e imágenes; el Sprint 5 entrega el catálogo público de solo lectura.
 
 ## Brand Commitments
 

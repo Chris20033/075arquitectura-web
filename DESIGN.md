@@ -135,7 +135,11 @@ En escritorio, los destinos se distribuyen en una línea sobre el hero. En móvi
 
 ### Project Figure
 
-La pareja preliminar combina una imagen vertical y otra horizontal para establecer ritmo de archivo. El hover aplica una ampliación mínima y la procedencia demo permanece visible en el caption.
+El archivo combina proporciones reales en una retícula asimétrica de doce columnas. Cada figura completa es un enlace, conserva su caption bajo una regla y amplía la imagen de forma mínima al pasar el puntero. La tercera pieza ocupa el centro del campo para romper la repetición binaria.
+
+### Project Detail
+
+La portada ocupa el primer viewport y sostiene nombre, categoría y ficha como anotaciones de una lámina. La descripción abre un campo de papel amplio; después, cada imagen se recorre verticalmente a su proporción natural. El cierre oscuro enlaza proyectos adyacentes sin introducir miniaturas, carruseles ni lightbox.
 
 ## Do's and Don'ts
 
