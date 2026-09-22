@@ -141,6 +141,16 @@ El archivo combina proporciones reales en una retícula asimétrica de doce colu
 
 La portada ocupa el primer viewport y sostiene nombre, categoría y ficha como anotaciones de una lámina. La descripción abre un campo de papel amplio; después, cada imagen se recorre verticalmente a su proporción natural. El cierre oscuro enlaza proyectos adyacentes sin introducir miniaturas, carruseles ni lightbox.
 
+### Admin Operations
+
+El panel usa el mismo vocabulario material en modo **Operate**. Un rail oscuro fija navegación y cuenta; el área de trabajo se organiza con filas, reglas y formularios amplios sobre papel. Estados y metadatos quedan alineados como notas de lámina, sin convertir registros en tarjetas.
+
+- Las acciones primarias son rectangulares, explícitas y separadas de las destructivas.
+- El reordenamiento usa controles visibles `Subir` y `Bajar`, con confirmación independiente.
+- Los diálogos se reservan para publicar, retirar, enviar a papelera y eliminar; devuelven el foco al control que los abrió.
+- En tablet el rail pasa a cabecera horizontal desplazable; en móvil los formularios y filas se apilan sin ocultar estado ni nombre.
+- La carga, portada, orden y texto alternativo de imágenes permanecen como resumen de solo lectura hasta el Sprint 7.
+
 ## Do's and Don'ts
 
 ### Do:

@@ -6,7 +6,7 @@ export default defineConfig({
   schema: "prisma/schema.prisma",
   migrations: {
     path: "prisma/migrations",
-    seed: "tsx prisma/seed.ts",
+    seed: "node scripts/run-tsx.mjs prisma/seed.ts",
   },
   datasource: {
     // Client generation must also work during `npm ci`, before an environment

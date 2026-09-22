@@ -46,11 +46,11 @@ export default async function AdminDashboardPage() {
           <div>
             <h2>Proyectos y categorías</h2>
             <p>
-              La estructura está protegida y preparada para creación, edición,
-              publicación y orden editorial.
+              Crea borradores, edita fichas, publica y ajusta el orden editorial
+              desde el archivo.
             </p>
           </div>
-          <span className="admin-status">Sprint 6</span>
+          <span className="admin-status">Disponible</span>
         </div>
         <div className="admin-worklist__row">
           <span className="admin-label">Perfil</span>
@@ -60,10 +60,11 @@ export default async function AdminDashboardPage() {
               {" campos configurados"}
             </h2>
             <p>
-              Nombre, biografía y datos públicos se editarán desde este panel.
+              Nombre, biografía, contacto y redes alimentan directamente la
+              experiencia pública.
             </p>
           </div>
-          <span className="admin-status">Sprint 6</span>
+          <span className="admin-status">Disponible</span>
         </div>
         <div className="admin-worklist__row">
           <span className="admin-label">Imágenes</span>

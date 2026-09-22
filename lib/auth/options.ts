@@ -4,7 +4,7 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import { database } from "@/lib/db";
 
 import { sanitizeAdminCallback } from "./callback-url";
-import { getAdminSessionCookie } from "./cookie";
+import { getAdminSessionCookie, usesSecureAdminCookie } from "./cookie";
 import { authenticateAdmin, getClientIdentity } from "./credentials";
 import { adminSessionMaxAgeSeconds, validateAdminClaims } from "./session";
 
@@ -18,7 +18,9 @@ export const authOptions: NextAuthOptions = {
     maxAge: adminSessionMaxAgeSeconds,
   },
   cookies: {
-    sessionToken: getAdminSessionCookie(process.env.NODE_ENV === "production"),
+    sessionToken: getAdminSessionCookie(
+      usesSecureAdminCookie(process.env.NEXTAUTH_URL),
+    ),
   },
   pages: {
     signIn: "/admin/acceso",
