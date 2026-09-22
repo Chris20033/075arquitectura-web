@@ -1,6 +1,6 @@
 # 075arquitectura
 
-Aplicación integral en Next.js para el portafolio público y la administración privada de 075arquitectura. Incluye persistencia, autenticación de propietaria, shell editorial de `/admin`, landing responsive y catálogo público por proyecto. El CRUD y las galerías administrables se implementarán en los Sprints 6 y 7.
+Aplicación integral en Next.js para el portafolio público y la administración privada de 075arquitectura. Incluye persistencia, autenticación de propietaria, landing responsive, catálogo público por proyecto y gestión administrativa de contenido. Las galerías administrables se completarán en el Sprint 7.
 
 ## Requisitos
 
@@ -98,7 +98,10 @@ La contraseña debe tener entre 15 y 128 caracteres. El comando normaliza el cor
 - Acceso: `/admin/acceso`.
 - Sesión cifrada con duración absoluta de ocho horas.
 - El panel revalida en PostgreSQL que la cuenta siga activa y que la contraseña no haya cambiado.
-- El dashboard usa métricas reales; proyectos, categorías, perfil y papelera muestran estados de próximos sprints.
+- El dashboard usa métricas reales y enlaza la gestión de proyectos, categorías, perfil, redes y papelera.
+- Las mutaciones usan Server Actions protegidas, validación en servidor, detección de ediciones obsoletas y revalidación selectiva.
+- Publicación, cambios de estado, restauración y orden se ejecutan en transacciones serializables con reintentos de conflicto.
+- La eliminación definitiva exige escribir el nombre exacto y solo se permite sin imágenes; la limpieza remota llega en el Sprint 7.
 - No existe registro público, recuperación automática ni API pública de negocio.
 
 El inicio y cierre de sesión usan NextAuth.js y protección CSRF. Los intentos fallidos se limitan en PostgreSQL mediante claves HMAC que no contienen el correo ni la IP legibles.
@@ -126,4 +129,4 @@ El formato puede corregirse con `npm run format`.
 
 ### Avisos de dependencias
 
-Al cerrar el Sprint 5, `npm audit --omit=dev` reporta cuatro avisos altos transitivos en `deepmerge-ts` y `mysql2` a través de la herramienta Prisma. La corrección sugerida por npm fuerza un downgrade incompatible a Prisma 6, por lo que no se aplicó `npm audit fix --force`. El proyecto usa exclusivamente PostgreSQL y mantendrá Prisma 7.10 hasta disponer de una actualización estable compatible; este aviso debe revisarse antes del despliegue.
+Al cerrar el Sprint 6, `npm audit --omit=dev` reporta cuatro avisos altos transitivos en `deepmerge-ts` y `mysql2` a través de la herramienta Prisma. La corrección sugerida por npm fuerza un downgrade incompatible a Prisma 6, por lo que no se aplicó `npm audit fix --force`. El proyecto usa exclusivamente PostgreSQL y mantendrá Prisma 7.10 hasta disponer de una actualización estable compatible; este aviso debe revisarse antes del despliegue.

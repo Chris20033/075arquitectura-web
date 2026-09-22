@@ -31,7 +31,7 @@ La propietaria utilizará `/admin` desde escritorio y móvil para mantener conte
 - Las sesiones duran como máximo ocho horas y se invalidan al cambiar la contraseña o desactivar la cuenta.
 - La landing pública consume `SiteProfile` y proyectos publicados; cada obra dispone de un detalle por slug.
 - Los recursos conceptuales permanecen identificados como demo hasta recibir obra real.
-- Los Sprints 6 y 7 implementarán la gestión de contenido e imágenes; el Sprint 5 entrega el catálogo público de solo lectura.
+- El Sprint 6 entrega la gestión de categorías, proyectos, perfil, redes y papelera; el Sprint 7 completará la gestión y eliminación remota de imágenes.
 
 ## Brand Commitments
 

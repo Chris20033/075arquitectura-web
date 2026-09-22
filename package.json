@@ -21,11 +21,11 @@
     "db:migrate:deploy": "prisma migrate deploy",
     "db:status": "prisma migrate status",
     "db:seed": "prisma db seed",
-    "db:bootstrap-admin": "tsx scripts/bootstrap-admin.ts",
-    "db:test:reset": "tsx scripts/reset-test-db.ts",
+    "db:bootstrap-admin": "node scripts/run-tsx.mjs scripts/bootstrap-admin.ts",
+    "db:test:reset": "node scripts/run-tsx.mjs scripts/reset-test-db.ts",
     "test": "vitest",
     "test:run": "vitest run",
-    "test:integration": "tsx scripts/reset-test-db.ts && vitest run",
+    "test:integration": "node scripts/run-tsx.mjs scripts/reset-test-db.ts && vitest run",
     "check": "npm run format:check && npm run lint && npm run typecheck && npm run test:integration && npm run build"
   },
   "dependencies": {
