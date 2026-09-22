@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-09-19T00:00:00.000Z",
+  "generatedAt": "2026-09-20T00:00:00.000Z",
   "title": "Design System: 075arquitectura",
   "extensions": {
     "colorMeta": {
@@ -105,9 +105,16 @@
     {
       "name": "Project Figure",
       "kind": "card",
-      "description": "Imagen a sangre con caption y regla, sin contenedor elevado.",
+      "description": "Enlace de proyecto con imagen a sangre, caption y regla; sus proporciones reales componen una retícula asimétrica.",
       "html": "<figure class=\"ds-project\"><div></div><figcaption><span>Estudio de luz</span><span>Interior · Demo</span></figcaption></figure>",
       "css": ".ds-project { width:300px; margin:0; color:#171717; font-family:Geist,Arial,sans-serif; } .ds-project div { aspect-ratio:3/4; background:#aaa69e; } .ds-project figcaption { display:flex; justify-content:space-between; gap:1rem; border-bottom:1px solid #aaa69e; padding:.95rem 0 .8rem; font-size:.68rem; font-weight:720; letter-spacing:.08em; text-transform:uppercase; } .ds-project figcaption span:last-child { color:#6b6862; text-align:right; }"
+    },
+    {
+      "name": "Project Detail Navigation",
+      "kind": "nav",
+      "description": "Cierre oscuro que enlaza obras adyacentes según el orden público, sin miniaturas ni contenedores flotantes.",
+      "html": "<nav class=\"ds-adjacent\"><a href=\"#\"><span>Anterior</span><strong>Casa Luz</strong></a><a href=\"#\"><span>Siguiente</span><strong>Casa Umbral</strong></a></nav>",
+      "css": ".ds-adjacent { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); background:#161616; color:#f5f2ec; } .ds-adjacent a { min-height:19rem; display:flex; flex-direction:column; justify-content:space-between; border-right:1px solid #4a4a4a; padding:2rem; color:inherit; text-decoration:none; } .ds-adjacent span { color:#bdb9b1; font:720 .66rem Geist,Arial,sans-serif; letter-spacing:.1em; text-transform:uppercase; } .ds-adjacent strong { max-width:13ch; font:540 3rem/.95 Geist,Arial,sans-serif; letter-spacing:-.04em; }"
     }
   ],
   "narrative": {

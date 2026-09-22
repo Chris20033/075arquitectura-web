@@ -1,6 +1,6 @@
 # 075arquitectura
 
-Aplicación integral en Next.js para el portafolio público y la administración privada de 075arquitectura. Incluye persistencia, autenticación de propietaria, shell editorial de `/admin` y landing pública responsive. El catálogo real, CRUD y galerías administrables se implementarán en los Sprints 5–7.
+Aplicación integral en Next.js para el portafolio público y la administración privada de 075arquitectura. Incluye persistencia, autenticación de propietaria, shell editorial de `/admin`, landing responsive y catálogo público por proyecto. El CRUD y las galerías administrables se implementarán en los Sprints 6 y 7.
 
 ## Requisitos
 
@@ -22,7 +22,7 @@ npm ci
 Copy-Item -LiteralPath '..\.env' -Destination '.\.env'
 ```
 
-2. Conserva las URLs locales incluidas o cambia únicamente las credenciales de desarrollo. El respaldo ya contiene un `AUTH_SECRET` local aleatorio; nunca lo reutilices en producción. Deja `NEXTAUTH_URL=http://localhost:3000`.
+2. Conserva las URLs locales incluidas o cambia únicamente las credenciales de desarrollo. El respaldo ya contiene un `AUTH_SECRET` local aleatorio; nunca lo reutilices en producción. Deja `NEXTAUTH_URL` y `SITE_URL` en `http://localhost:3000` durante desarrollo.
 3. Inicia PostgreSQL:
 
 ```bash
@@ -44,7 +44,7 @@ npm run dev
 
 La aplicación queda disponible en `http://localhost:3000`. PostgreSQL de desarrollo escucha solo en `127.0.0.1:5432`; la instancia de pruebas, solo en `127.0.0.1:5433`.
 
-El archivo `..\.env` es el respaldo manual y fuente de verdad. Primero edítalo y luego vuelve a copiarlo al proyecto; no existe sincronización automática. Ambos archivos son locales y no se versionan. `SITE_CONTENT_MODE=demo` mantiene visibles las advertencias de contenido conceptual. `CLOUDINARY_URL` permanece vacío hasta configurar la integración del Sprint 7 y nunca debe llegar al navegador.
+El archivo `..\.env` es el respaldo manual y fuente de verdad. Primero edítalo y luego vuelve a copiarlo al proyecto; no existe sincronización automática. Ambos archivos son locales y no se versionan. `SITE_CONTENT_MODE=demo` mantiene visibles las advertencias de contenido conceptual. `SITE_URL` debe usar el origen HTTPS real en producción. `CLOUDINARY_URL` permite construir URLs públicas de entrega, pero su clave y secreto nunca deben llegar al navegador.
 
 ## Flujo reproducible
 
@@ -84,11 +84,14 @@ La contraseña debe tener entre 15 y 128 caracteres. El comando normaliza el cor
 
 ## Sitio público
 
-- `/` es una landing one-page con proyectos conceptuales, estudio, servicios, proceso y contacto.
+- `/` es una landing one-page con catálogo ordenado, estudio, servicios, proceso y contacto.
+- `/proyectos/[slug]` muestra portada, ficha, galería y navegación al proyecto anterior o siguiente.
+- Solo los proyectos publicados, fuera de papelera y con imágenes públicas válidas aparecen en HTML, metadata y sitemap.
 - El perfil y las redes visibles se leen desde `SiteProfile` y respetan su orden.
 - Correos `.test`, URLs `example.invalid` y números ficticios se muestran como demo, pero nunca se convierten en enlaces.
 - Las imágenes conceptuales locales están documentadas en `public/images/README.md` y no representan obra real.
-- Cloudinary solo queda preparado mediante variables; las cargas siguen fuera de alcance hasta el Sprint 7.
+- En modo demo, los identificadores ficticios autorizados resuelven a imágenes locales. En modo live, las URLs se construyen desde Cloudinary con versión, ancho limitado, formato y calidad automáticos.
+- Las cargas, reemplazos y eliminaciones remotas siguen fuera de alcance hasta el Sprint 7.
 
 ## Panel administrativo
 
@@ -123,4 +126,4 @@ El formato puede corregirse con `npm run format`.
 
 ### Avisos de dependencias
 
-Al cerrar el Sprint 4, `npm audit --omit=dev` reporta cuatro avisos altos transitivos en `deepmerge-ts` y `mysql2` a través de la herramienta Prisma. La corrección sugerida por npm fuerza un downgrade incompatible a Prisma 6, por lo que no se aplicó `npm audit fix --force`. El proyecto usa exclusivamente PostgreSQL y mantendrá Prisma 7.10 hasta disponer de una actualización estable compatible; este aviso debe revisarse antes del despliegue.
+Al cerrar el Sprint 5, `npm audit --omit=dev` reporta cuatro avisos altos transitivos en `deepmerge-ts` y `mysql2` a través de la herramienta Prisma. La corrección sugerida por npm fuerza un downgrade incompatible a Prisma 6, por lo que no se aplicó `npm audit fix --force`. El proyecto usa exclusivamente PostgreSQL y mantendrá Prisma 7.10 hasta disponer de una actualización estable compatible; este aviso debe revisarse antes del despliegue.

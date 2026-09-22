@@ -1,14 +1,15 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 
 const links = [
-  ["Proyectos", "#proyectos"],
-  ["Estudio", "#estudio"],
-  ["Servicios", "#servicios"],
-  ["Proceso", "#proceso"],
-  ["Contacto", "#contacto"],
+  ["Proyectos", "/#proyectos"],
+  ["Estudio", "/#estudio"],
+  ["Servicios", "/#servicios"],
+  ["Proceso", "/#proceso"],
+  ["Contacto", "/#contacto"],
 ] as const;
 
 export function PublicNavigation() {
@@ -21,9 +22,9 @@ export function PublicNavigation() {
 
   return (
     <header className="public-header">
-      <a
+      <Link
         className="public-logo"
-        href="#inicio"
+        href="/#inicio"
         aria-label="075arquitectura, inicio"
       >
         <Image
@@ -33,12 +34,12 @@ export function PublicNavigation() {
           height={453}
           priority
         />
-      </a>
+      </Link>
       <nav className="public-nav" aria-label="Navegación principal">
         {links.map(([label, href]) => (
-          <a key={href} href={href}>
+          <Link key={href} href={href}>
             {label}
-          </a>
+          </Link>
         ))}
       </nav>
       <button
@@ -58,9 +59,9 @@ export function PublicNavigation() {
       >
         <nav aria-label="Navegación móvil">
           {links.map(([label, href]) => (
-            <a key={href} href={href} onClick={() => setIsOpen(false)}>
+            <Link key={href} href={href} onClick={() => setIsOpen(false)}>
               {label}
-            </a>
+            </Link>
           ))}
         </nav>
         <p>Arquitectura · Interiorismo · Visualización</p>

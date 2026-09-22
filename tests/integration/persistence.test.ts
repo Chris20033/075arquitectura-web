@@ -316,6 +316,8 @@ describe("seed and visibility", () => {
 
     expect(publicProjects.map((project) => project.slug)).toEqual([
       "casa-luz-demo",
+      "patio-de-tierra-demo",
+      "casa-umbral-demo",
     ]);
   });
 });

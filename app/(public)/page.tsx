@@ -1,13 +1,19 @@
 import type { Metadata } from "next";
-import Image from "next/image";
+import Link from "next/link";
 import { connection } from "next/server";
 
+import { ProjectImage } from "@/components/public/project-image";
 import { PublicNavigation } from "@/components/public/public-navigation";
 import {
   getContentMode,
   getPublicLandingData,
   type PublicLandingData,
 } from "@/lib/public/landing";
+import type { PublicProjectImage } from "@/lib/public/project-images";
+import {
+  getPublicProjects,
+  type PublicProjectSummary,
+} from "@/lib/public/projects";
 
 export const metadata: Metadata = {
   title: "Arquitectura con identidad",
@@ -49,25 +55,48 @@ const process = [
   ],
 ];
 
-async function readLanding(): Promise<
-  | { status: "ready"; data: PublicLandingData }
-  | { status: "error"; data: PublicLandingData }
-> {
-  try {
-    return { status: "ready", data: await getPublicLandingData() };
-  } catch {
-    return {
-      status: "error",
-      data: { mode: getContentMode(), profile: null },
-    };
-  }
+type LandingViewData = {
+  data: PublicLandingData;
+  profileStatus: "ready" | "error";
+  projectsStatus: "ready" | "error";
+  projects: PublicProjectSummary[];
+};
+
+const demoHeroFallback: PublicProjectImage = {
+  kind: "local",
+  src: "/images/concept/courtyard-house-demo.webp",
+  width: 1774,
+  height: 887,
+  alt: "Estudio conceptual de una casa de concreto abierta hacia un patio",
+  position: 0,
+  isCover: true,
+};
+
+async function readLanding(): Promise<LandingViewData> {
+  const [landingResult, projectsResult] = await Promise.allSettled([
+    getPublicLandingData(),
+    getPublicProjects(),
+  ]);
+  const mode = getContentMode();
+
+  return {
+    data:
+      landingResult.status === "fulfilled"
+        ? landingResult.value
+        : { mode, profile: null },
+    profileStatus: landingResult.status === "fulfilled" ? "ready" : "error",
+    projectsStatus: projectsResult.status === "fulfilled" ? "ready" : "error",
+    projects: projectsResult.status === "fulfilled" ? projectsResult.value : [],
+  };
 }
 
 export default async function Home() {
   await connection();
   const landing = await readLanding();
   const { profile, mode } = landing.data;
+  const { projects } = landing;
   const isDemo = mode === "demo";
+  const heroImage = projects[0]?.cover ?? (isDemo ? demoHeroFallback : null);
   const professionalName =
     profile?.professionalName.trim() || "075arquitectura";
   const biography =
@@ -87,14 +116,15 @@ export default async function Home() {
           id="inicio"
           aria-labelledby="hero-title"
         >
-          <Image
-            className="public-hero__image"
-            src="/images/concept/courtyard-house-demo.webp"
-            alt="Estudio conceptual de una casa de concreto abierta hacia un patio"
-            fill
-            priority
-            sizes="100vw"
-          />
+          {heroImage && (
+            <ProjectImage
+              image={heroImage}
+              className="public-hero__image"
+              fill
+              priority
+              sizes="100vw"
+            />
+          )}
           <div className="public-hero__wash" />
           <div className="public-hero__brand">
             <h1 id="hero-title">075</h1>
@@ -126,42 +156,64 @@ export default async function Home() {
         >
           <div className="public-section__heading">
             <h2 id="projects-title">Proyectos</h2>
-            <p>Archivo en preparación</p>
+            <p>
+              {projects.length > 0 ? `${projects.length} obras` : "Archivo"}
+            </p>
           </div>
-          <div className="public-project-grid">
-            <figure className="public-project public-project--portrait">
-              <div className="public-project__media">
-                <Image
-                  src="/images/concept/stair-interior-demo.webp"
-                  alt="Estudio conceptual de una escalera iluminada por luz natural"
-                  fill
-                  sizes="(max-width: 720px) 100vw, 46vw"
-                />
-              </div>
-              <figcaption>
-                <span>Estudio de luz</span>
-                <span>Interior · Demo</span>
-              </figcaption>
-            </figure>
-            <figure className="public-project public-project--landscape">
-              <div className="public-project__media">
-                <Image
-                  src="/images/concept/brick-pavilion-demo.webp"
-                  alt="Estudio conceptual de un pabellón de ladrillo y jardín"
-                  fill
-                  sizes="(max-width: 720px) 100vw, 48vw"
-                />
-              </div>
-              <figcaption>
-                <span>Patio de tierra</span>
-                <span>Arquitectura · Demo</span>
-              </figcaption>
-            </figure>
-          </div>
-          <p className="public-projects__note">
-            Estas imágenes son estudios conceptuales de demostración. El archivo
-            de obra se incorporará en la siguiente etapa.
-          </p>
+          {landing.projectsStatus === "error" ? (
+            <div className="public-projects__state" role="status">
+              <p>El archivo no pudo cargarse.</p>
+              <span>Intenta nuevamente en unos minutos.</span>
+            </div>
+          ) : projects.length === 0 ? (
+            <div className="public-projects__state" role="status">
+              <p>El archivo está tomando forma.</p>
+              <span>Los primeros proyectos aparecerán aquí muy pronto.</span>
+            </div>
+          ) : (
+            <div className="public-project-grid">
+              {projects.map((project, index) => (
+                <Link
+                  className="public-project"
+                  href={`/proyectos/${project.slug}`}
+                  key={project.slug}
+                  aria-label={`Ver ${project.name}`}
+                >
+                  <figure>
+                    <div
+                      className="public-project__media"
+                      style={{
+                        aspectRatio: `${project.cover.width} / ${project.cover.height}`,
+                      }}
+                    >
+                      <ProjectImage
+                        image={project.cover}
+                        fill
+                        sizes={
+                          index === 2
+                            ? "(max-width: 700px) 92vw, 66vw"
+                            : "(max-width: 700px) 92vw, 48vw"
+                        }
+                      />
+                    </div>
+                    <figcaption>
+                      <span>{project.name}</span>
+                      <span>
+                        {project.category.name}
+                        {project.year ? ` · ${project.year}` : ""}
+                      </span>
+                    </figcaption>
+                  </figure>
+                </Link>
+              ))}
+            </div>
+          )}
+          {isDemo && projects.length > 0 && (
+            <p className="public-projects__note">
+              Archivo conceptual de demostración. Ninguna imagen representa obra
+              construida de 075arquitectura.
+            </p>
+          )}
         </section>
 
         <section
@@ -197,7 +249,7 @@ export default async function Home() {
               </div>
               {!profile && (
                 <p className="public-content-status" role="status">
-                  {landing.status === "error"
+                  {landing.profileStatus === "error"
                     ? "El perfil no pudo cargarse. Mostramos contenido editorial temporal."
                     : "Perfil en configuración. Mostramos contenido editorial temporal."}
                 </p>
