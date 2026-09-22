@@ -2,6 +2,10 @@ import { getToken } from "next-auth/jwt";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
+import {
+  getAdminSessionCookie,
+  usesSecureAdminCookie,
+} from "@/lib/auth/cookie";
 import { isAdminTokenWithinAbsoluteLifetime } from "@/lib/auth/session";
 
 export async function proxy(request: NextRequest) {
@@ -10,7 +14,12 @@ export async function proxy(request: NextRequest) {
   }
 
   const secret = process.env.AUTH_SECRET;
-  const token = secret ? await getToken({ req: request, secret }) : null;
+  const cookieName = getAdminSessionCookie(
+    usesSecureAdminCookie(process.env.NEXTAUTH_URL),
+  ).name;
+  const token = secret
+    ? await getToken({ req: request, secret, cookieName })
+    : null;
 
   if (token && isAdminTokenWithinAbsoluteLifetime(token)) {
     return NextResponse.next();

@@ -4,7 +4,10 @@ import { afterAll, beforeEach, describe, expect, it } from "vitest";
 
 import { LoginThrottleScope } from "@/generated/prisma/enums";
 import { sanitizeAdminCallback } from "@/lib/auth/callback-url";
-import { getAdminSessionCookie } from "@/lib/auth/cookie";
+import {
+  getAdminSessionCookie,
+  usesSecureAdminCookie,
+} from "@/lib/auth/cookie";
 import { authenticateAdmin } from "@/lib/auth/credentials";
 import {
   createLoginThrottleKey,
@@ -174,7 +177,7 @@ describe("persistent throttling", () => {
 });
 
 describe("absolute administrator session", () => {
-  it("uses an HttpOnly, SameSite cookie and enables Secure in production", () => {
+  it("uses an HttpOnly, SameSite cookie and enables Secure when requested", () => {
     expect(getAdminSessionCookie(false)).toMatchObject({
       name: "next-auth.session-token",
       options: { httpOnly: true, sameSite: "lax", secure: false },
@@ -184,6 +187,20 @@ describe("absolute administrator session", () => {
       options: { httpOnly: true, sameSite: "lax", secure: true },
     });
   });
+
+  it.each([
+    ["http://localhost:3000", "production", false],
+    ["http://127.0.0.1:3000", "production", false],
+    ["https://075arquitectura.com", "development", true],
+    [undefined, "development", false],
+    [undefined, "production", true],
+    ["invalid-url", "production", true],
+  ])(
+    "derives secure cookies from the configured origin %s",
+    (origin, environment, expected) => {
+      expect(usesSecureAdminCookie(origin, environment)).toBe(expected);
+    },
+  );
 
   it("accepts a current token and rejects expiry, deactivation, and password changes", async () => {
     const admin = await database.adminUser.findUniqueOrThrow({
