@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { connection } from "next/server";
 
 import { ProjectImage } from "@/components/public/project-image";
+import { PublicProjectArchive } from "@/components/public/public-project-archive";
 import { PublicNavigation } from "@/components/public/public-navigation";
+import { SocialNetworkIcon } from "@/components/public/social-network-icon";
+import { WhatsAppIcon } from "@/components/public/whatsapp-icon";
 import {
   getContentMode,
   getPublicLandingData,
@@ -14,6 +16,7 @@ import {
   getPublicProjects,
   type PublicProjectSummary,
 } from "@/lib/public/projects";
+import { socialNetworkLabel } from "@/lib/social-networks";
 
 export const metadata: Metadata = {
   title: "Arquitectura con identidad",
@@ -63,13 +66,14 @@ type LandingViewData = {
 };
 
 const demoHeroFallback: PublicProjectImage = {
-  kind: "local",
+  kind: "bundled",
   src: "/images/concept/courtyard-house-demo.webp",
   width: 1774,
   height: 887,
   alt: "Estudio conceptual de una casa de concreto abierta hacia un patio",
   position: 0,
   isCover: true,
+  variants: [],
 };
 
 async function readLanding(): Promise<LandingViewData> {
@@ -83,7 +87,7 @@ async function readLanding(): Promise<LandingViewData> {
     data:
       landingResult.status === "fulfilled"
         ? landingResult.value
-        : { mode, profile: null },
+        : { mode, profile: null, heroImage: null },
     profileStatus: landingResult.status === "fulfilled" ? "ready" : "error",
     projectsStatus: projectsResult.status === "fulfilled" ? "ready" : "error",
     projects: projectsResult.status === "fulfilled" ? projectsResult.value : [],
@@ -93,10 +97,10 @@ async function readLanding(): Promise<LandingViewData> {
 export default async function Home() {
   await connection();
   const landing = await readLanding();
-  const { profile, mode } = landing.data;
+  const { profile, mode, heroImage: configuredHero } = landing.data;
   const { projects } = landing;
   const isDemo = mode === "demo";
-  const heroImage = projects[0]?.cover ?? (isDemo ? demoHeroFallback : null);
+  const heroImage = configuredHero ?? (isDemo ? demoHeroFallback : null);
   const professionalName =
     profile?.professionalName.trim() || "075arquitectura";
   const biography =
@@ -171,42 +175,7 @@ export default async function Home() {
               <span>Los primeros proyectos aparecerán aquí muy pronto.</span>
             </div>
           ) : (
-            <div className="public-project-grid">
-              {projects.map((project, index) => (
-                <Link
-                  className="public-project"
-                  href={`/proyectos/${project.slug}`}
-                  key={project.slug}
-                  aria-label={`Ver ${project.name}`}
-                >
-                  <figure>
-                    <div
-                      className="public-project__media"
-                      style={{
-                        aspectRatio: `${project.cover.width} / ${project.cover.height}`,
-                      }}
-                    >
-                      <ProjectImage
-                        image={project.cover}
-                        fill
-                        sizes={
-                          index === 2
-                            ? "(max-width: 700px) 92vw, 66vw"
-                            : "(max-width: 700px) 92vw, 48vw"
-                        }
-                      />
-                    </div>
-                    <figcaption>
-                      <span>{project.name}</span>
-                      <span>
-                        {project.category.name}
-                        {project.year ? ` · ${project.year}` : ""}
-                      </span>
-                    </figcaption>
-                  </figure>
-                </Link>
-              ))}
-            </div>
+            <PublicProjectArchive projects={projects} />
           )}
           {isDemo && projects.length > 0 && (
             <p className="public-projects__note">
@@ -320,8 +289,16 @@ export default async function Home() {
                   href={profile.whatsappHref}
                   target="_blank"
                   rel="noreferrer"
+                  aria-label="Escribir por WhatsApp (se abre en una pestaña nueva)"
                 >
+                  <WhatsAppIcon className="public-contact__cta-mark" />
                   Escribir por WhatsApp
+                  <span
+                    className="public-contact__cta-arrow"
+                    aria-hidden="true"
+                  >
+                    ↗
+                  </span>
                 </a>
               )}
             </div>
@@ -329,15 +306,24 @@ export default async function Home() {
               {profile?.socialLinks.map((link) =>
                 link.href ? (
                   <a
-                    key={link.label}
+                    key={link.id}
                     href={link.href}
                     target="_blank"
                     rel="noreferrer"
+                    className="public-contact__social-link"
+                    aria-label={`${link.platform === "OTHER" ? link.displayName : `${socialNetworkLabel(link.platform)}: ${link.displayName}`} (se abre en una pestaña nueva)`}
                   >
-                    {link.label}
+                    <SocialNetworkIcon platform={link.platform} />
+                    <span>{link.displayName}</span>
+                    <span
+                      className="public-contact__external"
+                      aria-hidden="true"
+                    >
+                      ↗
+                    </span>
                   </a>
                 ) : (
-                  <span key={link.label}>{link.label} · Demo</span>
+                  <span key={link.id}>{link.displayName} · Demo</span>
                 ),
               )}
               {profile?.publicEmail &&

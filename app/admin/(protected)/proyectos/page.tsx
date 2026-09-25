@@ -32,17 +32,21 @@ export default async function ProjectsPage({
         <div>
           <h1 className="admin-page__title">Proyectos</h1>
           <p className="admin-page__intro">
-            Edita la ficha, controla su estado y construye el orden público del
-            portafolio.
+            Crea, completa y publica tus proyectos desde un solo lugar.
           </p>
         </div>
-        <Link
-          className="admin-button"
-          data-tone="primary"
-          href="/admin/proyectos/nuevo"
-        >
-          Nuevo proyecto
-        </Link>
+        <div className="admin-page__actions">
+          <Link className="admin-text-action" href="/admin/categorias">
+            Tipos de proyecto
+          </Link>
+          <Link
+            className="admin-button"
+            data-tone="primary"
+            href="/admin/proyectos/nuevo"
+          >
+            Crear proyecto
+          </Link>
+        </div>
       </header>
 
       <nav className="admin-filter" aria-label="Filtrar proyectos">
@@ -82,7 +86,6 @@ export default async function ProjectsPage({
               </span>
               <span className="admin-project-row__name">
                 <strong>{project.name}</strong>
-                <small>/{project.slug}</small>
               </span>
               <span>{project.category}</span>
               <span>{project.imageCount} imágenes</span>
@@ -101,8 +104,8 @@ export default async function ProjectsPage({
         aria-labelledby="project-order-title"
       >
         <div className="admin-section__header">
-          <h2 id="project-order-title">Orden público</h2>
-          <span>Solo proyectos publicados</span>
+          <h2 id="project-order-title">Orden en el sitio</h2>
+          <span>Solo aparecen los proyectos publicados</span>
         </div>
         <ReorderList
           items={published.map((project) => ({

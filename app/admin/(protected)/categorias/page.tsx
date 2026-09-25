@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import { AdminActionForm } from "@/components/admin/admin-action-form";
 import { ConfirmDialog } from "@/components/admin/confirm-dialog";
 import { ReorderList } from "@/components/admin/reorder-list";
@@ -16,10 +18,13 @@ export default async function CategoriesPage() {
     <article className="admin-page">
       <header className="admin-page__header">
         <div>
-          <h1 className="admin-page__title">Categorías</h1>
+          <Link className="admin-back-link" href="/admin/proyectos">
+            Volver a proyectos
+          </Link>
+          <h1 className="admin-page__title">Tipos de proyecto</h1>
           <p className="admin-page__intro">
-            Clasifica la obra y define el orden editorial disponible para el
-            archivo.
+            Agrupa tus proyectos con nombres fáciles de reconocer, por ejemplo
+            Residencial o Comercial.
           </p>
         </div>
         <span className="admin-page__date">
@@ -33,8 +38,8 @@ export default async function CategoriesPage() {
           aria-labelledby="category-list-title"
         >
           <div className="admin-section__header">
-            <h2 id="category-list-title">Archivo de categorías</h2>
-            <span>Nombre y slug se mantienen sincronizados</span>
+            <h2 id="category-list-title">Tipos disponibles</h2>
+            <span>El enlace se actualiza automáticamente</span>
           </div>
           {categories.length === 0 ? (
             <p className="admin-empty">
@@ -50,6 +55,7 @@ export default async function CategoriesPage() {
                     submitLabel="Guardar"
                     pendingLabel="Guardando…"
                     tone="secondary"
+                    trackChanges
                   >
                     <input
                       type="hidden"
@@ -114,24 +120,27 @@ export default async function CategoriesPage() {
         </aside>
       </div>
 
-      <section
-        className="admin-section admin-section--spaced"
-        aria-labelledby="category-order-title"
-      >
-        <div className="admin-section__header">
-          <h2 id="category-order-title">Orden manual</h2>
-          <span>Compatible con teclado y móvil</span>
-        </div>
-        <ReorderList
-          items={categories.map((category) => ({
-            id: category.id,
-            title: category.name,
-            meta: `${category.projectCount} proyectos`,
-          }))}
-          action={reorderCategoriesAction}
-          emptyMessage="El orden estará disponible cuando existan categorías."
-        />
-      </section>
+      <details className="admin-maintenance admin-section--spaced">
+        <summary>Cambiar el orden de los tipos</summary>
+        <p>
+          Abre esta herramienta solo si quieres cambiar cómo aparecen en el
+          panel.
+        </p>
+        <section aria-labelledby="category-order-title">
+          <h2 id="category-order-title" className="admin-visually-hidden">
+            Orden de tipos de proyecto
+          </h2>
+          <ReorderList
+            items={categories.map((category) => ({
+              id: category.id,
+              title: category.name,
+              meta: `${category.projectCount} proyectos`,
+            }))}
+            action={reorderCategoriesAction}
+            emptyMessage="El orden estará disponible cuando existan tipos."
+          />
+        </section>
+      </details>
     </article>
   );
 }

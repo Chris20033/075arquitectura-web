@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import { getAdminDashboardData } from "@/lib/admin/dashboard";
 
 const dateFormatter = new Intl.DateTimeFormat("es-MX", {
@@ -20,16 +22,47 @@ export default async function AdminDashboardPage() {
   return (
     <article className="admin-page">
       <header className="admin-page__header">
-        <h1 className="admin-page__title">Resumen</h1>
+        <h1 className="admin-page__title">Inicio</h1>
         <time className="admin-page__date" dateTime={new Date().toISOString()}>
           {dateFormatter.format(new Date())}
         </time>
       </header>
 
-      <section className="admin-summary" aria-labelledby="estado-portafolio">
-        <h2 className="admin-summary__lead" id="estado-portafolio">
-          El portafolio está listo para su <span>siguiente etapa.</span>
+      <section className="admin-summary" aria-labelledby="admin-next-action">
+        <h2 className="admin-summary__lead" id="admin-next-action">
+          ¿Qué quieres <span>hacer hoy?</span>
         </h2>
+        <div className="admin-quick-actions">
+          <Link href="/admin/proyectos/nuevo">
+            <strong>Crear un proyecto</strong>
+            <span>Añade la información y después sus imágenes.</span>
+          </Link>
+          {data.recentDraft ? (
+            <Link href={`/admin/proyectos/${data.recentDraft.id}`}>
+              <strong>Continuar “{data.recentDraft.name}”</strong>
+              <span>Es el borrador que editaste más recientemente.</span>
+            </Link>
+          ) : (
+            <Link href="/admin/proyectos">
+              <strong>Ver mis proyectos</strong>
+              <span>Consulta lo publicado y los borradores.</span>
+            </Link>
+          )}
+          <Link href="/admin/perfil">
+            <strong>Cambiar portada o contacto</strong>
+            <span>Actualiza lo que las personas ven de tu estudio.</span>
+          </Link>
+          <Link href="/" target="_blank">
+            <strong>Ver el sitio público</strong>
+            <span>Se abrirá en una pestaña nueva.</span>
+          </Link>
+        </div>
+      </section>
+
+      <section
+        className="admin-summary admin-summary--compact"
+        aria-label="Resumen del contenido"
+      >
         <dl className="admin-metrics">
           {metrics.map(([label, value]) => (
             <div className="admin-metric" key={label}>
@@ -40,20 +73,23 @@ export default async function AdminDashboardPage() {
         </dl>
       </section>
 
-      <section className="admin-worklist" aria-label="Estado de módulos">
+      <section className="admin-worklist" aria-label="Tareas pendientes">
         <div className="admin-worklist__row">
-          <span className="admin-label">Contenido</span>
+          <span className="admin-label">Proyectos</span>
           <div>
             <h2>Proyectos y categorías</h2>
             <p>
-              Crea borradores, edita fichas, publica y ajusta el orden editorial
-              desde el archivo.
+              {data.metrics.drafts > 0
+                ? `Tienes ${data.metrics.drafts} ${data.metrics.drafts === 1 ? "borrador pendiente" : "borradores pendientes"}.`
+                : "No tienes borradores pendientes."}
             </p>
           </div>
-          <span className="admin-status">Disponible</span>
+          <Link className="admin-text-action" href="/admin/proyectos">
+            Revisar proyectos
+          </Link>
         </div>
         <div className="admin-worklist__row">
-          <span className="admin-label">Perfil</span>
+          <span className="admin-label">Mi sitio</span>
           <div>
             <h2>
               {data.profileCompletion.completed}/{data.profileCompletion.total}
@@ -64,18 +100,23 @@ export default async function AdminDashboardPage() {
               experiencia pública.
             </p>
           </div>
-          <span className="admin-status">Disponible</span>
+          <Link
+            className="admin-text-action"
+            href="/admin/perfil?seccion=informacion"
+          >
+            Completar datos
+          </Link>
         </div>
         <div className="admin-worklist__row">
-          <span className="admin-label">Imágenes</span>
+          <span className="admin-label">Ayuda</span>
           <div>
-            <h2>Galerías y portadas</h2>
+            <h2>Trabaja paso a paso</h2>
             <p>
-              La carga segura, el orden y el ciclo de vida en Cloudinary se
-              integrarán después de la gestión editorial.
+              Primero guarda la información, luego agrega imágenes y al final
+              revisa antes de publicar.
             </p>
           </div>
-          <span className="admin-status">Sprint 7</span>
+          <span className="admin-status">3 pasos</span>
         </div>
       </section>
     </article>

@@ -135,11 +135,11 @@ En escritorio, los destinos se distribuyen en una línea sobre el hero. En móvi
 
 ### Project Figure
 
-El archivo combina proporciones reales en una retícula asimétrica de doce columnas. Cada figura completa es un enlace, conserva su caption bajo una regla y amplía la imagen de forma mínima al pasar el puntero. La tercera pieza ocupa el centro del campo para romper la repetición binaria.
+La landing presenta el archivo como una banda horizontal cinematográfica: una obra domina el campo y deja visible el inicio de la siguiente. Cada figura completa es un enlace, usa un recorte `16:10` en escritorio y `4:5` en móvil, conserva su caption bajo una regla y amplía la imagen de forma mínima al pasar el puntero. El desplazamiento es nativo, con snap, contador, progreso terracota y controles tipográficos; nunca avanza automáticamente. Las proporciones completas permanecen en el detalle del proyecto.
 
 ### Project Detail
 
-La portada ocupa el primer viewport y sostiene nombre, categoría y ficha como anotaciones de una lámina. La descripción abre un campo de papel amplio; después, cada imagen se recorre verticalmente a su proporción natural. El cierre oscuro enlaza proyectos adyacentes sin introducir miniaturas, carruseles ni lightbox.
+La portada ocupa el primer viewport y sostiene nombre, categoría y ficha como anotaciones de una lámina. La descripción abre un campo de papel amplio; después, la galería forma una cuadrícula uniforme de tres columnas en escritorio y dos en tablet y móvil. Las miniaturas usan un recorte `4:3` para ordenar el archivo; al abrirlas, un visor oscuro preserva el encuadre completo, mantiene visible la página detrás y permite avanzar con botones, teclado o swipe horizontal. El cierre oscuro enlaza proyectos adyacentes.
 
 ### Admin Operations
 
@@ -149,7 +149,18 @@ El panel usa el mismo vocabulario material en modo **Operate**. Un rail oscuro f
 - El reordenamiento usa controles visibles `Subir` y `Bajar`, con confirmación independiente.
 - Los diálogos se reservan para publicar, retirar, enviar a papelera y eliminar; devuelven el foco al control que los abrió.
 - En tablet el rail pasa a cabecera horizontal desplazable; en móvil los formularios y filas se apilan sin ocultar estado ni nombre.
-- La carga, portada, orden y texto alternativo de imágenes permanecen como resumen de solo lectura hasta el Sprint 7.
+- El gestor de galería ocupa todo el ancho bajo la ficha: cola de carga con progreso, miniaturas proporcionadas, metadatos, texto alternativo y controles explícitos de portada, orden y eliminación.
+- La portada principal del sitio se gestiona en Perfil como un recurso independiente, con previsualización `16:9`, descripción accesible y advertencia de recorte para archivos verticales.
+- Las cargas aceptan cualquier resolución entera positiva; JPEG, PNG o WebP y 20 MB continúan como límites claros para la propietaria.
+- La cola y la galería se organizan como filas editoriales continuas. El progreso usa una regla terracota y los errores explican recuperación o reintento sin introducir tarjetas ni drag-and-drop.
+- La cola distingue **Subiendo**, **Esperando para optimizar**, **Generando versiones para cada pantalla** e **Imagen guardada**; la implementación técnica permanece fuera del lenguaje cotidiano.
+- Cada selección aún no guardada puede quitarse de la cola; durante la transferencia, **Cancelar y quitar** comunica ambas consecuencias sin confundirla con eliminar una imagen ya guardada.
+- Las vistas previas usan variantes WebP ya procesadas. El panel nunca enlaza el original privado ni expone la estructura física del volumen.
+- La navegación principal se limita a Inicio, Proyectos, Mi sitio y Papelera. Los tipos de proyecto viven dentro de Proyectos.
+- Inicio prioriza tareas concretas sobre métricas; el editor de proyecto revela Información, Imágenes y Publicación como tres pasos separados.
+- Mi sitio separa Portada, Información y Redes sociales. Los formularios editables usan una barra fija con estado de guardado y protegen cambios pendientes.
+- WhatsApp es el cierre de contacto dominante: verde WhatsApp y su SVG oficial son la excepción funcional dentro del campo terracota; el texto conserva contraste oscuro. Las redes usan SVG locales monocromos, nombre de usuario y una salida externa visible; nunca dependen de iconos remotos ni de adivinar una plataforma desde la URL.
+- El vocabulario visible evita términos internos como slug, reconciliación o sprint. Las herramientas técnicas permanecen plegadas hasta que exista un problema.
 
 ## Do's and Don'ts
 

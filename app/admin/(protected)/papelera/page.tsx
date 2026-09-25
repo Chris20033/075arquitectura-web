@@ -14,8 +14,8 @@ export default async function TrashPage() {
         <div>
           <h1 className="admin-page__title">Papelera</h1>
           <p className="admin-page__intro">
-            Recupera contenido conservado o elimina borradores sin imágenes de
-            forma definitiva.
+            Recupera contenido conservado o elimina proyectos y sus recursos
+            remotos de forma definitiva.
           </p>
         </div>
         <span className="admin-page__date">{projects.length} archivados</span>
@@ -61,20 +61,11 @@ export default async function TrashPage() {
                 <ConfirmDialog
                   action={permanentlyDeleteProjectAction.bind(null, project.id)}
                   title={`Eliminar ${project.name}`}
-                  description={
-                    project.imageCount > 0
-                      ? "Este proyecto conserva imágenes. La eliminación remota estará disponible en Sprint 7."
-                      : "Esta acción es irreversible y eliminará el proyecto de PostgreSQL."
-                  }
-                  triggerLabel={
-                    project.imageCount > 0
-                      ? "Eliminación pendiente"
-                      : "Eliminar definitivamente"
-                  }
+                  description={`Esta acción eliminará ${project.imageCount} ${project.imageCount === 1 ? "imagen" : "imágenes"}, sus originales privados y todas sus versiones WebP antes de retirar el proyecto.`}
+                  triggerLabel="Eliminar definitivamente"
                   confirmLabel="Eliminar definitivamente"
                   confirmationName={project.name}
                   tone="danger"
-                  disabled={project.imageCount > 0}
                 />
               </div>
             </article>

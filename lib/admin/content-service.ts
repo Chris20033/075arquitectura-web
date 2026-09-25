@@ -1,7 +1,12 @@
 import { Prisma } from "@/generated/prisma/client";
 import { ProjectStatus } from "@/generated/prisma/enums";
 import type { DatabaseClient } from "@/lib/db/client";
+import type { SocialNetwork } from "@/lib/social-networks";
 import { getPublicationIssuesForCandidate } from "@/lib/projects/publication";
+import {
+  getPublicImageUrl,
+  resolvePublicProjectImage,
+} from "@/lib/public/project-images";
 
 import { AdminContentError } from "./content-result";
 import {
@@ -316,6 +321,12 @@ export function createAdminContentService(database: DatabaseClient) {
                 width: true,
                 height: true,
                 position: true,
+                originalFormat: true,
+                originalBytes: true,
+                mediaKey: true,
+                storageKind: true,
+                storageKey: true,
+                variants: true,
               },
             },
           },
@@ -336,7 +347,30 @@ export function createAdminContentService(database: DatabaseClient) {
         status: project.status,
         publishedAt: project.publishedAt?.toISOString() ?? null,
         updatedAt: project.updatedAt.toISOString(),
-        images: project.images,
+        images: project.images.map((image) => ({
+          id: image.id,
+          altText: image.altText,
+          isCover: image.isCover,
+          width: image.width,
+          height: image.height,
+          position: image.position,
+          format: image.originalFormat,
+          bytes: Number(image.originalBytes),
+          previewUrl: getPublicImageUrl(
+            resolvePublicProjectImage({
+              mediaKey: image.mediaKey,
+              storageKind: image.storageKind,
+              storageKey: image.storageKey,
+              variants: image.variants,
+              width: image.width,
+              height: image.height,
+              altText: image.altText ?? "Vista previa del proyecto",
+              position: image.position,
+              isCover: image.isCover,
+            }),
+            900,
+          ),
+        })),
         publicationIssues: issues,
         categories: categories.map((category) => ({
           id: category.id,
@@ -623,7 +657,10 @@ export function createAdminContentService(database: DatabaseClient) {
     async getProfile() {
       const profile = await database.siteProfile.findUnique({
         where: { singletonKey: "default" },
-        include: { socialLinks: { orderBy: { position: "asc" } } },
+        include: {
+          heroImage: true,
+          socialLinks: { orderBy: { position: "asc" } },
+        },
       });
       if (!profile)
         throw new AdminContentError(
@@ -638,8 +675,34 @@ export function createAdminContentService(database: DatabaseClient) {
         publicEmail: profile.publicEmail,
         publicPhone: profile.publicPhone,
         updatedAt: profile.updatedAt.toISOString(),
+        heroImage: profile.heroImage
+          ? {
+              id: profile.heroImage.id,
+              altText: profile.heroImage.altText,
+              width: profile.heroImage.width,
+              height: profile.heroImage.height,
+              format: profile.heroImage.originalFormat,
+              bytes: Number(profile.heroImage.originalBytes),
+              previewUrl: getPublicImageUrl(
+                resolvePublicProjectImage({
+                  mediaKey: profile.heroImage.mediaKey,
+                  storageKind: profile.heroImage.storageKind,
+                  storageKey: profile.heroImage.storageKey,
+                  variants: profile.heroImage.variants,
+                  width: profile.heroImage.width,
+                  height: profile.heroImage.height,
+                  altText: profile.heroImage.altText,
+                  position: 0,
+                  isCover: true,
+                }),
+                1600,
+              ),
+            }
+          : null,
         socialLinks: profile.socialLinks.map((link) => ({
           id: link.id,
+          platform: link.platform as SocialNetwork,
+          username: link.username,
           label: link.label,
           url: link.url,
           position: link.position,
@@ -667,6 +730,8 @@ export function createAdminContentService(database: DatabaseClient) {
     },
 
     async createSocialLink(input: {
+      platform: SocialNetwork;
+      username: string | null;
       label: string;
       url: string;
       isVisible: boolean;
@@ -697,7 +762,13 @@ export function createAdminContentService(database: DatabaseClient) {
     async updateSocialLink(
       id: string,
       expectedUpdatedAt: Date,
-      input: { label: string; url: string; isVisible: boolean },
+      input: {
+        platform: SocialNetwork;
+        username: string | null;
+        label: string;
+        url: string;
+        isVisible: boolean;
+      },
     ) {
       const updated = await database.socialLink.updateMany({
         where: { id, updatedAt: expectedUpdatedAt },

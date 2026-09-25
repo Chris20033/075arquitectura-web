@@ -77,14 +77,14 @@ export function ReorderList({
                 disabled={pending || index === 0}
                 onClick={() => move(index, -1)}
               >
-                Subir
+                Mover arriba
               </button>
               <button
                 type="button"
                 disabled={pending || index === ordered.length - 1}
                 onClick={() => move(index, 1)}
               >
-                Bajar
+                Mover abajo
               </button>
             </span>
           </li>

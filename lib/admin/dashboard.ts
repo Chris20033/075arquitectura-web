@@ -7,7 +7,7 @@ import { database } from "@/lib/db";
 export async function getAdminDashboardData() {
   const session = await requireAdminOperation();
 
-  const [projects, published, drafts, trash, categories, profile] =
+  const [projects, published, drafts, trash, categories, profile, recentDraft] =
     await Promise.all([
       database.project.count(),
       database.project.count({
@@ -28,6 +28,11 @@ export async function getAdminDashboardData() {
           publicPhone: true,
         },
       }),
+      database.project.findFirst({
+        where: { status: ProjectStatus.DRAFT, deletedAt: null },
+        orderBy: { updatedAt: "desc" },
+        select: { id: true, name: true },
+      }),
     ]);
 
   const profileFields = profile ? Object.values(profile) : [];
@@ -42,5 +47,6 @@ export async function getAdminDashboardData() {
       completed: completedProfileFields,
       total: 5,
     },
+    recentDraft,
   };
 }

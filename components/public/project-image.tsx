@@ -19,8 +19,12 @@ export function ProjectImage({
   priority = false,
   fill = false,
 }: ProjectImageProps) {
-  const cloudinaryLoader = ({ src, width }: ImageLoaderProps) =>
-    src.replace("w_auto", `w_${Math.min(image.width, width)}`);
+  const managedLoader = ({ src, width }: ImageLoaderProps) => {
+    const variant =
+      image.variants.find((candidate) => candidate.width >= width) ??
+      image.variants.at(-1);
+    return variant ? src.replace("__variant__", variant.name) : src;
+  };
 
   return (
     <Image
@@ -32,7 +36,7 @@ export function ProjectImage({
       fill={fill}
       sizes={sizes}
       priority={priority}
-      loader={image.kind === "cloudinary" ? cloudinaryLoader : undefined}
+      loader={image.kind === "managed" ? managedLoader : undefined}
     />
   );
 }

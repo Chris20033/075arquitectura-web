@@ -9,6 +9,8 @@ vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }));
 vi.mock("next/navigation", () => ({ redirect: vi.fn() }));
 
 import * as actions from "@/lib/admin/content-actions";
+import * as heroActions from "@/lib/admin/hero-image-actions";
+import * as imageActions from "@/lib/admin/image-actions";
 import type { AdminActionState } from "@/lib/admin/content-result";
 
 const initialState: AdminActionState = {
@@ -19,7 +21,9 @@ const initialState: AdminActionState = {
 
 const formData = new FormData();
 
-const guardedActions: Array<[string, () => Promise<AdminActionState>]> = [
+const guardedActions: Array<
+  [string, () => Promise<AdminActionState<unknown>>]
+> = [
   [
     "createCategoryAction",
     () => actions.createCategoryAction(initialState, formData),
@@ -88,6 +92,64 @@ const guardedActions: Array<[string, () => Promise<AdminActionState>]> = [
     "reorderSocialLinksAction",
     () => actions.reorderSocialLinksAction(initialState, formData),
   ],
+  [
+    "prepareImageUploadsAction",
+    () => imageActions.prepareImageUploadsAction("id", []),
+  ],
+  [
+    "updateImageAltTextsAction",
+    () => imageActions.updateImageAltTextsAction("id", []),
+  ],
+  [
+    "setProjectCoverAction",
+    () => imageActions.setProjectCoverAction("id", "image"),
+  ],
+  [
+    "reorderProjectImagesAction",
+    () => imageActions.reorderProjectImagesAction("id", []),
+  ],
+  [
+    "updateProjectGalleryAction",
+    () => imageActions.updateProjectGalleryAction("id", []),
+  ],
+  [
+    "deleteProjectImageAction",
+    () => imageActions.deleteProjectImageAction("id", "image"),
+  ],
+  [
+    "cleanupPendingUploadsAction",
+    () => imageActions.cleanupPendingUploadsAction(),
+  ],
+  [
+    "cancelProjectMediaUploadAction",
+    () => imageActions.cancelProjectMediaUploadAction("project", "upload"),
+  ],
+  [
+    "cancelHeroMediaUploadAction",
+    () => imageActions.cancelHeroMediaUploadAction("upload"),
+  ],
+  [
+    "permanentlyDeleteProjectWithImagesAction",
+    () => imageActions.permanentlyDeleteProjectWithImagesAction("id", "name"),
+  ],
+  [
+    "prepareHeroUploadAction",
+    () =>
+      heroActions.prepareHeroUploadAction({
+        name: "hero.jpg",
+        mimeType: "image/jpeg",
+        format: "jpg",
+        width: 1600,
+        height: 1200,
+        bytes: 1_000_000,
+        altText: "Portada",
+      }),
+  ],
+  [
+    "updateHeroAltTextAction",
+    () => heroActions.updateHeroAltTextAction(initialState, formData),
+  ],
+  ["deleteHeroImageAction", () => heroActions.deleteHeroImageAction()],
 ];
 
 describe("authorization for administrative content actions", () => {

@@ -1,7 +1,7 @@
 import argon2 from "argon2";
 import { afterAll, beforeEach, describe, expect, it } from "vitest";
 
-import { ProjectStatus } from "@/generated/prisma/enums";
+import { MediaStorageKind, ProjectStatus } from "@/generated/prisma/enums";
 import { AdminBootstrapError, bootstrapAdmin } from "@/lib/admin/bootstrap";
 import { createDatabaseClient } from "@/lib/db/client";
 import {
@@ -151,14 +151,15 @@ describe("initial schema", () => {
       database.projectImage.create({
         data: {
           projectId: project.id,
-          cloudinaryAssetId: "duplicate-cover-asset",
-          cloudinaryPublicId: "075arquitectura/tests/duplicate-cover",
-          cloudinaryVersion: 1n,
-          secureUrl: "https://example.invalid/duplicate-cover.jpg",
-          format: "jpg",
+          storageKind: MediaStorageKind.BUNDLED,
+          storageKey: "/images/concept/courtyard-house-demo.webp",
+          originalFilename: "duplicate-cover.jpg",
+          originalFormat: "jpeg",
+          originalBytes: 1000n,
+          displayFormat: "webp",
+          variants: [],
           width: 100,
           height: 100,
-          bytes: 1000n,
           altText: "Portada duplicada.",
           position: 2,
           isCover: true,
@@ -170,14 +171,15 @@ describe("initial schema", () => {
       database.projectImage.create({
         data: {
           projectId: project.id,
-          cloudinaryAssetId: "duplicate-position-asset",
-          cloudinaryPublicId: "075arquitectura/tests/duplicate-position",
-          cloudinaryVersion: 1n,
-          secureUrl: "https://example.invalid/duplicate-position.jpg",
-          format: "jpg",
+          storageKind: MediaStorageKind.BUNDLED,
+          storageKey: "/images/concept/stair-interior-demo.webp",
+          originalFilename: "duplicate-position.jpg",
+          originalFormat: "jpeg",
+          originalBytes: 1000n,
+          displayFormat: "webp",
+          variants: [],
           width: 100,
           height: 100,
-          bytes: 1000n,
           altText: "Posición duplicada.",
           position: 0,
         },
@@ -185,7 +187,7 @@ describe("initial schema", () => {
     ).rejects.toThrow();
   });
 
-  it("enforces public ordering, Cloudinary IDs, and year checks", async () => {
+  it("enforces public ordering, media keys, and year checks", async () => {
     const category = await database.category.findUniqueOrThrow({
       where: { slug: "residencial-demo" },
     });
@@ -240,18 +242,21 @@ describe("initial schema", () => {
     const draft = await database.project.findUniqueOrThrow({
       where: { slug: "estudio-borrador-demo" },
     });
+    const existingImage = await database.projectImage.findFirstOrThrow();
     await expect(
       database.projectImage.create({
         data: {
           projectId: draft.id,
-          cloudinaryAssetId: "demo-asset-published-cover",
-          cloudinaryPublicId: "075arquitectura/tests/unique-public-id",
-          cloudinaryVersion: 1n,
-          secureUrl: "https://example.invalid/duplicate-asset.jpg",
-          format: "jpg",
+          mediaKey: existingImage.mediaKey,
+          storageKind: MediaStorageKind.BUNDLED,
+          storageKey: "/images/concept/casa-umbral-cover-demo.webp",
+          originalFilename: "duplicate-key.jpg",
+          originalFormat: "jpeg",
+          originalBytes: 1000n,
+          displayFormat: "webp",
+          variants: [],
           width: 100,
           height: 100,
-          bytes: 1000n,
           altText: "ID duplicado.",
           position: 5,
         },
@@ -262,16 +267,38 @@ describe("initial schema", () => {
       database.projectImage.create({
         data: {
           projectId: draft.id,
-          cloudinaryAssetId: "unique-asset-duplicate-public-id",
-          cloudinaryPublicId: "075arquitectura/demo/casa-luz-cover",
-          cloudinaryVersion: 1n,
-          secureUrl: "https://example.invalid/duplicate-public-id.jpg",
-          format: "jpg",
+          uploadToken: "00000000-0000-7000-8000-000000000001",
+          storageKind: MediaStorageKind.BUNDLED,
+          storageKey: "/images/concept/casa-umbral-stair-demo.webp",
+          originalFilename: "first-token.jpg",
+          originalFormat: "jpeg",
+          originalBytes: 1000n,
+          displayFormat: "webp",
+          variants: [],
           width: 100,
           height: 100,
-          bytes: 1000n,
           altText: "Public ID duplicado.",
           position: 6,
+        },
+      }),
+    ).resolves.toBeDefined();
+
+    await expect(
+      database.projectImage.create({
+        data: {
+          projectId: draft.id,
+          uploadToken: "00000000-0000-7000-8000-000000000001",
+          storageKind: MediaStorageKind.BUNDLED,
+          storageKey: "/images/concept/brick-pavilion-demo.webp",
+          originalFilename: "duplicate-token.jpg",
+          originalFormat: "jpeg",
+          originalBytes: 1000n,
+          displayFormat: "webp",
+          variants: [],
+          width: 100,
+          height: 100,
+          altText: "Token duplicado.",
+          position: 7,
         },
       }),
     ).rejects.toThrow();
