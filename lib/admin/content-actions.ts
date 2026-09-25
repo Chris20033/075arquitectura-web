@@ -347,17 +347,18 @@ export async function trashProjectAction(
   formData: FormData,
 ): Promise<AdminActionState> {
   try {
-    return await authorizedAction(async () => {
+    await authorizedAction(async () => {
       await content.trashProject(
         id,
         parseExpectedDate(formData.get("updatedAt")),
       );
       refreshAdminAndPublic();
-      return successResult("Proyecto enviado a la papelera.");
     });
   } catch (error) {
     return errorResult(error);
   }
+
+  redirect("/admin/proyectos");
 }
 
 export async function reorderProjectsAction(
