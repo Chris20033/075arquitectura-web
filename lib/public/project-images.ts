@@ -1,35 +1,29 @@
 import "server-only";
 
-import { getContentMode } from "./landing";
+import { MediaStorageKind } from "@/generated/prisma/enums";
+import type { StoredVariant } from "@/lib/media/processor";
 
-const DEMO_IMAGE_SOURCES: Record<string, string> = {
-  "075arquitectura/demo/casa-luz-cover":
-    "/images/concept/courtyard-house-demo.webp",
-  "075arquitectura/demo/casa-luz-gallery":
-    "/images/concept/stair-interior-demo.webp",
-  "075arquitectura/demo/patio-tierra-cover":
-    "/images/concept/brick-pavilion-demo.webp",
-  "075arquitectura/demo/patio-tierra-gallery":
-    "/images/concept/patio-tierra-detail-demo.webp",
-  "075arquitectura/demo/casa-umbral-cover":
-    "/images/concept/casa-umbral-cover-demo.webp",
-  "075arquitectura/demo/casa-umbral-gallery":
-    "/images/concept/casa-umbral-stair-demo.webp",
-};
+export type PublicImageVariant = Pick<
+  StoredVariant,
+  "name" | "width" | "height"
+>;
 
 export type PublicProjectImage = {
-  kind: "local" | "cloudinary";
+  kind: "bundled" | "managed";
   src: string;
   width: number;
   height: number;
   alt: string;
   position: number;
   isCover: boolean;
+  variants: PublicImageVariant[];
 };
 
 export type ProjectImageRecord = {
-  cloudinaryPublicId: string;
-  cloudinaryVersion: bigint;
+  mediaKey: string;
+  storageKind: MediaStorageKind;
+  storageKey: string;
+  variants: unknown;
   width: number;
   height: number;
   altText: string | null;
@@ -44,118 +38,77 @@ export class PublicImageConfigurationError extends Error {
   }
 }
 
-function encodePublicId(publicId: string) {
-  return publicId.split("/").map(encodeURIComponent).join("/");
-}
-
-export function getCloudinaryCloudName(value = process.env.CLOUDINARY_URL) {
-  if (!value) {
-    return null;
-  }
-
-  try {
-    const url = new URL(value);
-    if (url.protocol !== "cloudinary:" || !url.hostname) {
-      return null;
-    }
-    return url.hostname;
-  } catch {
-    return null;
-  }
-}
-
-export function buildCloudinaryImageTemplate(input: {
-  cloudName: string;
-  publicId: string;
-  version: bigint | number | string;
-}) {
-  const cloudName = encodeURIComponent(input.cloudName);
-  const publicId = encodePublicId(input.publicId);
-  const version = String(input.version);
-
-  if (!/^\d+$/.test(version)) {
-    throw new PublicImageConfigurationError(
-      "Cloudinary image version must be numeric.",
-    );
-  }
-
-  return `https://res.cloudinary.com/${cloudName}/image/upload/c_limit,w_auto/f_auto/q_auto/v${version}/${publicId}`;
-}
-
-export function resolveImageWidth(sourceWidth: number, requestedWidth: number) {
-  const safeSourceWidth = Math.max(1, Math.round(sourceWidth));
-  const safeRequestedWidth = Math.max(1, Math.round(requestedWidth));
-  return Math.min(safeSourceWidth, safeRequestedWidth);
-}
-
-export function resolveCloudinaryImageUrl(
-  template: string,
-  sourceWidth: number,
-  requestedWidth: number,
-) {
-  return template.replace(
-    "w_auto",
-    `w_${resolveImageWidth(sourceWidth, requestedWidth)}`,
-  );
+export function parsePublicVariants(value: unknown): PublicImageVariant[] {
+  if (!Array.isArray(value)) return [];
+  return value
+    .filter(
+      (item): item is StoredVariant =>
+        Boolean(item) &&
+        typeof item === "object" &&
+        "name" in item &&
+        "width" in item &&
+        "height" in item &&
+        typeof item.name === "string" &&
+        typeof item.width === "number" &&
+        typeof item.height === "number",
+    )
+    .map(({ name, width, height }) => ({ name, width, height }));
 }
 
 export function resolvePublicProjectImage(
   image: ProjectImageRecord,
-  options: {
-    mode?: "demo" | "live";
-    cloudinaryUrl?: string;
-  } = {},
 ): PublicProjectImage {
   const alt = image.altText?.trim();
-  if (!alt || image.width <= 0 || image.height <= 0) {
+  if (!alt || image.width <= 0 || image.height <= 0)
     throw new PublicImageConfigurationError(
       "Project image is missing public rendering metadata.",
     );
-  }
 
-  const mode = options.mode ?? getContentMode();
-  const demoSource = DEMO_IMAGE_SOURCES[image.cloudinaryPublicId];
-  if (mode === "demo" && demoSource) {
+  if (image.storageKind === MediaStorageKind.BUNDLED) {
     return {
-      kind: "local",
-      src: demoSource,
+      kind: "bundled",
+      src: image.storageKey,
       width: image.width,
       height: image.height,
       alt,
       position: image.position,
       isCover: image.isCover,
+      variants: [],
     };
   }
 
-  const cloudName = getCloudinaryCloudName(
-    options.cloudinaryUrl ?? process.env.CLOUDINARY_URL,
-  );
-  if (!cloudName) {
+  const variants = parsePublicVariants(image.variants);
+  if (variants.length === 0)
     throw new PublicImageConfigurationError(
-      "Cloudinary delivery is not configured for public project images.",
+      "Managed image is missing WebP variants.",
     );
-  }
-
   return {
-    kind: "cloudinary",
-    src: buildCloudinaryImageTemplate({
-      cloudName,
-      publicId: image.cloudinaryPublicId,
-      version: image.cloudinaryVersion,
-    }),
+    kind: "managed",
+    src: `/media/${image.mediaKey}/__variant__`,
     width: image.width,
     height: image.height,
     alt,
     position: image.position,
     isCover: image.isCover,
+    variants,
   };
+}
+
+export function selectPublicVariant(
+  image: PublicProjectImage,
+  requestedWidth: number,
+) {
+  if (image.kind === "bundled" || image.variants.length === 0) return null;
+  return (
+    image.variants.find((variant) => variant.width >= requestedWidth) ??
+    image.variants.at(-1)!
+  );
 }
 
 export function getPublicImageUrl(
   image: PublicProjectImage,
-  requestedWidth = 1200,
+  requestedWidth = 1280,
 ) {
-  return image.kind === "cloudinary"
-    ? resolveCloudinaryImageUrl(image.src, image.width, requestedWidth)
-    : image.src;
+  const variant = selectPublicVariant(image, requestedWidth);
+  return variant ? image.src.replace("__variant__", variant.name) : image.src;
 }

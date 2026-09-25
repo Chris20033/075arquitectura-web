@@ -4,7 +4,6 @@ import { ProjectStatus } from "@/generated/prisma/enums";
 import { database } from "@/lib/db";
 import type { DatabaseClient } from "@/lib/db/client";
 
-import { getContentMode } from "./landing";
 import {
   resolvePublicProjectImage,
   type PublicProjectImage,
@@ -33,7 +32,6 @@ export type PublicProjectDetail = PublicProjectSummary & {
 
 type ProjectQueryOptions = {
   mode?: "demo" | "live";
-  cloudinaryUrl?: string;
 };
 
 async function findPublicProjectRecords(client: DatabaseClient) {
@@ -53,8 +51,10 @@ async function findPublicProjectRecords(client: DatabaseClient) {
       images: {
         orderBy: { position: "asc" },
         select: {
-          cloudinaryPublicId: true,
-          cloudinaryVersion: true,
+          mediaKey: true,
+          storageKind: true,
+          storageKey: true,
+          variants: true,
           width: true,
           height: true,
           altText: true,
@@ -68,7 +68,6 @@ async function findPublicProjectRecords(client: DatabaseClient) {
 
 function toRenderableProject(
   project: Awaited<ReturnType<typeof findPublicProjectRecords>>[number],
-  options: ProjectQueryOptions,
 ) {
   if (
     project.images.length === 0 ||
@@ -82,7 +81,7 @@ function toRenderableProject(
   }
 
   const images = project.images.map((image) =>
-    resolvePublicProjectImage(image, options),
+    resolvePublicProjectImage(image),
   );
   const cover = images.find((image) => image.isCover);
   if (!cover) {
@@ -101,13 +100,10 @@ function toRenderableProject(
   };
 }
 
-async function getRenderableProjects(
-  client: DatabaseClient,
-  options: ProjectQueryOptions,
-) {
+async function getRenderableProjects(client: DatabaseClient) {
   const records = await findPublicProjectRecords(client);
   return records
-    .map((project) => toRenderableProject(project, options))
+    .map((project) => toRenderableProject(project))
     .filter((project): project is NonNullable<typeof project> =>
       Boolean(project),
     );
@@ -117,8 +113,8 @@ export async function getPublicProjects(
   client: DatabaseClient = database,
   options: ProjectQueryOptions = {},
 ): Promise<PublicProjectSummary[]> {
-  const mode = options.mode ?? getContentMode();
-  const projects = await getRenderableProjects(client, { ...options, mode });
+  void options;
+  const projects = await getRenderableProjects(client);
 
   return projects.map((project) => ({
     name: project.name,
@@ -135,8 +131,8 @@ export async function getPublicProjectBySlug(
   client: DatabaseClient = database,
   options: ProjectQueryOptions = {},
 ): Promise<PublicProjectDetail | null> {
-  const mode = options.mode ?? getContentMode();
-  const projects = await getRenderableProjects(client, { ...options, mode });
+  void options;
+  const projects = await getRenderableProjects(client);
   const index = projects.findIndex((project) => project.slug === slug);
   if (index < 0) {
     return null;

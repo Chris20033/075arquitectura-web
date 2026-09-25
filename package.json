@@ -22,6 +22,7 @@
     "db:status": "prisma migrate status",
     "db:seed": "prisma db seed",
     "db:bootstrap-admin": "node scripts/run-tsx.mjs scripts/bootstrap-admin.ts",
+    "media:legacy-report": "node scripts/run-tsx.mjs scripts/report-cloudinary-media.ts",
     "db:test:reset": "node scripts/run-tsx.mjs scripts/reset-test-db.ts",
     "test": "vitest",
     "test:run": "vitest run",
@@ -38,7 +39,8 @@
     "pg": "^8.23.0",
     "react": "19.2.8",
     "react-dom": "19.2.8",
-    "server-only": "^0.0.1"
+    "server-only": "^0.0.1",
+    "sharp": "0.35.4"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

@@ -2,13 +2,7 @@ import { afterAll, beforeEach, describe, expect, it } from "vitest";
 
 import { ProjectStatus } from "@/generated/prisma/enums";
 import { createDatabaseClient } from "@/lib/db/client";
-import {
-  buildCloudinaryImageTemplate,
-  getCloudinaryCloudName,
-  getPublicImageUrl,
-  PublicImageConfigurationError,
-  resolveCloudinaryImageUrl,
-} from "@/lib/public/project-images";
+import { getPublicImageUrl } from "@/lib/public/project-images";
 import {
   buildProjectMetadata,
   buildPublicSitemap,
@@ -43,8 +37,8 @@ describe("public project catalogue", () => {
     expect(Object.keys(projects[0]).sort()).toEqual(
       ["category", "cover", "location", "name", "slug", "year"].sort(),
     );
-    expect(JSON.stringify(projects)).not.toContain("cloudinaryAssetId");
-    expect(JSON.stringify(projects)).not.toContain("secureUrl");
+    expect(JSON.stringify(projects)).not.toContain("storageKey");
+    expect(JSON.stringify(projects)).not.toContain("originalSha256");
     expect(JSON.stringify(projects)).not.toContain("bytes");
   });
 
@@ -63,8 +57,11 @@ describe("public project catalogue", () => {
       getPublicProjectBySlug("no-existe", database, { mode: "demo" }),
     ).resolves.toBeNull();
 
-    await database.projectImage.update({
-      where: { cloudinaryAssetId: "demo-asset-patio-gallery" },
+    await database.projectImage.updateMany({
+      where: {
+        project: { slug: "patio-de-tierra-demo" },
+        isCover: false,
+      },
       data: { altText: null },
     });
 
@@ -135,48 +132,35 @@ describe("public project catalogue", () => {
 });
 
 describe("public project image delivery", () => {
-  it("builds versioned Cloudinary URLs without credentials and clamps widths", () => {
-    const cloudinaryUrl = "cloudinary://api-key:api-secret@demo-cloud";
-    expect(getCloudinaryCloudName(cloudinaryUrl)).toBe("demo-cloud");
-
-    const template = buildCloudinaryImageTemplate({
-      cloudName: "demo-cloud",
-      publicId: "075 Arquitectura/proyecto/portada final",
-      version: 42n,
-    });
-    const delivered = resolveCloudinaryImageUrl(template, 1600, 2400);
-
-    expect(delivered).toBe(
-      "https://res.cloudinary.com/demo-cloud/image/upload/c_limit,w_1600/f_auto/q_auto/v42/075%20Arquitectura/proyecto/portada%20final",
-    );
-    expect(delivered).not.toContain("api-key");
-    expect(delivered).not.toContain("api-secret");
-  });
-
-  it("uses allowlisted local assets only in demo mode", async () => {
+  it("uses bundled assets for demonstration projects", async () => {
     const demo = await getPublicProjectBySlug("casa-luz-demo", database, {
       mode: "demo",
     });
     expect(demo?.cover).toMatchObject({
-      kind: "local",
+      kind: "bundled",
       src: "/images/concept/courtyard-house-demo.webp",
     });
-
-    const live = await getPublicProjectBySlug("casa-luz-demo", database, {
-      mode: "live",
-      cloudinaryUrl: "cloudinary://api-key:api-secret@demo-cloud",
-    });
-    expect(live?.cover.kind).toBe("cloudinary");
-    expect(getPublicImageUrl(live!.cover, 900)).toContain(
-      "/c_limit,w_900/f_auto/q_auto/v1/",
-    );
-    expect(getPublicImageUrl(live!.cover)).not.toContain("example.invalid");
   });
 
-  it("fails closed when live image delivery is not configured", async () => {
-    await expect(
-      getPublicProjects(database, { mode: "live", cloudinaryUrl: "" }),
-    ).rejects.toBeInstanceOf(PublicImageConfigurationError);
+  it("selects the nearest generated WebP variant without exposing storage", () => {
+    const image = {
+      kind: "managed" as const,
+      src: "/media/00000000-0000-7000-8000-000000000123/__variant__",
+      width: 1800,
+      height: 1200,
+      alt: "Vista de prueba",
+      position: 0,
+      isCover: true,
+      variants: [
+        { name: "mobile" as const, width: 480, height: 320 },
+        { name: "tablet" as const, width: 768, height: 512 },
+        { name: "laptop" as const, width: 1280, height: 853 },
+        { name: "desktop" as const, width: 1800, height: 1200 },
+      ],
+    };
+    expect(getPublicImageUrl(image, 900)).toContain("/laptop");
+    expect(getPublicImageUrl(image, 2400)).toContain("/desktop");
+    expect(JSON.stringify(image)).not.toContain("uploads/");
   });
 });
 
@@ -201,7 +185,7 @@ describe("project metadata", () => {
         },
       ],
     });
-    expect(JSON.stringify(metadata)).not.toContain("cloudinaryAssetId");
-    expect(JSON.stringify(metadata)).not.toContain("secureUrl");
+    expect(JSON.stringify(metadata)).not.toContain("storageKey");
+    expect(JSON.stringify(metadata)).not.toContain("originalSha256");
   });
 });

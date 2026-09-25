@@ -5,6 +5,7 @@ import { connection } from "next/server";
 import { cache } from "react";
 
 import { ProjectImage } from "@/components/public/project-image";
+import { ProjectGallery } from "@/components/public/project-gallery";
 import { PublicNavigation } from "@/components/public/public-navigation";
 import { getContentMode } from "@/lib/public/landing";
 import { buildProjectMetadata } from "@/lib/public/project-metadata";
@@ -88,28 +89,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
           </div>
         </section>
 
-        {project.gallery.length > 0 && (
-          <section
-            className="project-detail-gallery"
-            aria-label={`Galería de ${project.name}`}
-          >
-            {project.gallery.map((image) => (
-              <figure
-                className="project-detail-gallery__figure"
-                key={`${project.slug}-${image.position}`}
-              >
-                <ProjectImage
-                  image={image}
-                  sizes="(max-width: 700px) 100vw, 86vw"
-                />
-                <figcaption>
-                  <span>{String(image.position + 1).padStart(2, "0")}</span>
-                  <span>{image.alt}</span>
-                </figcaption>
-              </figure>
-            ))}
-          </section>
-        )}
+        <ProjectGallery images={project.gallery} projectName={project.name} />
 
         <nav className="project-detail-adjacent" aria-label="Otros proyectos">
           {project.previous && !adjacentAreEqual && (

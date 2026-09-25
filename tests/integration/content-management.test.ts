@@ -1,6 +1,6 @@
 import { afterAll, beforeEach, describe, expect, it } from "vitest";
 
-import { ProjectStatus } from "@/generated/prisma/enums";
+import { MediaStorageKind, ProjectStatus } from "@/generated/prisma/enums";
 import { createAdminContentService } from "@/lib/admin/content-service";
 import { AdminContentError } from "@/lib/admin/content-result";
 import { normalizeName, slugify, uniqueSlug } from "@/lib/admin/content-utils";
@@ -92,14 +92,16 @@ describe("project editing and publication", () => {
     await database.projectImage.create({
       data: {
         projectId: project.id,
-        cloudinaryAssetId: `test-asset-${project.id}`,
-        cloudinaryPublicId: `test/public-${project.id}`,
-        cloudinaryVersion: 1n,
-        secureUrl: "https://example.invalid/test.jpg",
-        format: "jpg",
+        storageKind: MediaStorageKind.BUNDLED,
+        storageKey: "/images/concept/courtyard-house-demo.webp",
+        originalFilename: "test.jpg",
+        originalFormat: "jpeg",
+        originalBytes: 1000n,
+        originalSha256: null,
+        displayFormat: "webp",
+        variants: [],
         width: 1600,
         height: 1200,
-        bytes: 1000n,
         altText: "Vista exterior de prueba.",
         position: 0,
         isCover: true,
@@ -267,5 +269,21 @@ describe("profile and social links", () => {
     expect(
       (await content.getProfile()).socialLinks.map((item) => item.id),
     ).toEqual(reversed);
+  });
+
+  it("stores a selected network and its username separately", async () => {
+    const created = await content.createSocialLink({
+      platform: "INSTAGRAM",
+      username: "estudio_075",
+      label: "Instagram",
+      url: "https://instagram.com/estudio_075",
+      isVisible: true,
+    });
+
+    expect(created).toMatchObject({
+      platform: "INSTAGRAM",
+      username: "estudio_075",
+      label: "Instagram",
+    });
   });
 });

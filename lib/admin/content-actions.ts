@@ -5,6 +5,11 @@ import { redirect } from "next/navigation";
 
 import { database } from "@/lib/db";
 import { requireAdminOperation } from "@/lib/auth/access";
+import {
+  isSocialNetwork,
+  normalizeSocialUsername,
+  socialNetworkLabel,
+} from "@/lib/social-networks";
 
 import {
   AdminContentError,
@@ -13,6 +18,7 @@ import {
   type AdminActionState,
 } from "./content-result";
 import { createAdminContentService } from "./content-service";
+import { permanentlyDeleteProjectWithImagesAction } from "./image-actions";
 import {
   optionalText,
   parseExpectedDate,
@@ -135,7 +141,38 @@ function parseProfileInput(formData: FormData) {
 }
 
 function parseSocialInput(formData: FormData) {
-  const label = requiredText(formData.get("label"), "label", "La etiqueta", 80);
+  const rawPlatform = requiredText(
+    formData.get("platform"),
+    "platform",
+    "La red social",
+    32,
+  );
+  if (!isSocialNetwork(rawPlatform)) {
+    throw new AdminContentError(
+      "VALIDATION_ERROR",
+      "Revisa los campos indicados.",
+      { platform: "Selecciona una red social válida." },
+    );
+  }
+  const username = normalizeSocialUsername(
+    optionalText(
+      formData.get("username"),
+      "username",
+      "El nombre de usuario",
+      80,
+    ) ?? "",
+  );
+  const label =
+    rawPlatform === "OTHER"
+      ? requiredText(formData.get("label"), "label", "El nombre", 80)
+      : socialNetworkLabel(rawPlatform);
+  if (rawPlatform !== "OTHER" && !username) {
+    throw new AdminContentError(
+      "VALIDATION_ERROR",
+      "Revisa los campos indicados.",
+      { username: "Escribe el nombre de usuario de esta red." },
+    );
+  }
   const url = requiredText(formData.get("url"), "url", "La URL", 2_000);
   try {
     const parsed = new URL(url);
@@ -149,7 +186,13 @@ function parseSocialInput(formData: FormData) {
       },
     );
   }
-  return { label, url, isVisible: formData.get("isVisible") === "on" };
+  return {
+    platform: rawPlatform,
+    username: rawPlatform === "OTHER" ? null : username,
+    label,
+    url,
+    isVisible: formData.get("isVisible") === "on",
+  };
 }
 
 export async function createCategoryAction(
@@ -360,21 +403,13 @@ export async function permanentlyDeleteProjectAction(
   _state: AdminActionState,
   formData: FormData,
 ): Promise<AdminActionState> {
-  try {
-    return await authorizedAction(async () => {
-      const confirmation = optionalText(
-        formData.get("confirmation"),
-        "confirmation",
-        "La confirmación",
-        180,
-      );
-      await content.permanentlyDeleteProject(id, confirmation ?? "");
-      refreshAdminAndPublic();
-      return successResult("Proyecto eliminado definitivamente.");
-    });
-  } catch (error) {
-    return errorResult(error);
-  }
+  const confirmation = optionalText(
+    formData.get("confirmation"),
+    "confirmation",
+    "La confirmación",
+    180,
+  );
+  return permanentlyDeleteProjectWithImagesAction(id, confirmation ?? "");
 }
 
 export async function updateProfileAction(

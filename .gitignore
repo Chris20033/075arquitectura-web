@@ -33,9 +33,7 @@ yarn-error.log*
 # env files (can opt-in for committing if needed)
 .env*
 !.env.example
-
-# vercel
-.vercel
+!.env.production.example
 
 # typescript
 *.tsbuildinfo
@@ -43,3 +41,6 @@ next-env.d.ts
 
 # generated database client
 /generated/prisma
+
+# runtime media (persist and back up outside Git)
+/uploads

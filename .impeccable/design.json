@@ -105,9 +105,9 @@
     {
       "name": "Project Figure",
       "kind": "card",
-      "description": "Enlace de proyecto con imagen a sangre, caption y regla; sus proporciones reales componen una retícula asimétrica.",
-      "html": "<figure class=\"ds-project\"><div></div><figcaption><span>Estudio de luz</span><span>Interior · Demo</span></figcaption></figure>",
-      "css": ".ds-project { width:300px; margin:0; color:#171717; font-family:Geist,Arial,sans-serif; } .ds-project div { aspect-ratio:3/4; background:#aaa69e; } .ds-project figcaption { display:flex; justify-content:space-between; gap:1rem; border-bottom:1px solid #aaa69e; padding:.95rem 0 .8rem; font-size:.68rem; font-weight:720; letter-spacing:.08em; text-transform:uppercase; } .ds-project figcaption span:last-child { color:#6b6862; text-align:right; }"
+      "description": "Enlace de proyecto dentro de una banda horizontal con recorte cinematográfico, caption y regla; la siguiente obra permanece parcialmente visible.",
+      "html": "<figure class=\"ds-project\"><div><span>01</span></div><figcaption><span>Estudio de luz</span><span>Interior · Demo</span></figcaption></figure>",
+      "css": ".ds-project { width:min(72vw,68rem); margin:0; color:#171717; font-family:Geist,Arial,sans-serif; scroll-snap-align:start; } .ds-project div { position:relative; aspect-ratio:16/10; background:#aaa69e; } .ds-project div span { position:absolute; top:1rem; left:1rem; display:grid; width:2.75rem; height:2.75rem; place-items:center; background:#161616; color:#f5f2ec; font-size:.66rem; } .ds-project figcaption { display:flex; justify-content:space-between; gap:1rem; border-bottom:1px solid #aaa69e; padding:.95rem 0 .8rem; font-size:.68rem; font-weight:720; letter-spacing:.08em; text-transform:uppercase; } .ds-project figcaption span:last-child { color:#6b6862; text-align:right; }"
     },
     {
       "name": "Project Detail Navigation",
@@ -115,6 +115,13 @@
       "description": "Cierre oscuro que enlaza obras adyacentes según el orden público, sin miniaturas ni contenedores flotantes.",
       "html": "<nav class=\"ds-adjacent\"><a href=\"#\"><span>Anterior</span><strong>Casa Luz</strong></a><a href=\"#\"><span>Siguiente</span><strong>Casa Umbral</strong></a></nav>",
       "css": ".ds-adjacent { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); background:#161616; color:#f5f2ec; } .ds-adjacent a { min-height:19rem; display:flex; flex-direction:column; justify-content:space-between; border-right:1px solid #4a4a4a; padding:2rem; color:inherit; text-decoration:none; } .ds-adjacent span { color:#bdb9b1; font:720 .66rem Geist,Arial,sans-serif; letter-spacing:.1em; text-transform:uppercase; } .ds-adjacent strong { max-width:13ch; font:540 3rem/.95 Geist,Arial,sans-serif; letter-spacing:-.04em; }"
+    },
+    {
+      "name": "Project Detail Gallery",
+      "kind": "media",
+      "description": "Cuadrícula editorial uniforme con miniaturas 4:3 y visor oscuro que recupera el encuadre completo mediante botones, teclado o swipe.",
+      "html": "<div class=\"ds-detail-gallery\"><figure><button><img alt=\"Vista del patio\" /></button><figcaption><span>01</span><span>Vista del patio</span></figcaption></figure></div>",
+      "css": ".ds-detail-gallery { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:2rem 1rem; color:#171717; font-family:Geist,Arial,sans-serif; } .ds-detail-gallery figure { margin:0; } .ds-detail-gallery button { width:100%; aspect-ratio:4/3; overflow:hidden; border:0; padding:0; background:#aaa69e; } .ds-detail-gallery img { width:100%; height:100%; object-fit:cover; } .ds-detail-gallery figcaption { display:grid; grid-template-columns:3rem 1fr; gap:1rem; border-bottom:1px solid #aaa69e; padding:.9rem 0; color:#6b6862; font-size:.68rem; }"
     },
     {
       "name": "Admin Operation Row",
@@ -129,6 +136,20 @@
       "description": "Campo amplio sobre papel con etiqueta de lámina, regla inferior y foco terracota.",
       "html": "<label class=\"ds-admin-field\"><span>Nombre</span><input value=\"Casa Luz\" /></label>",
       "css": ".ds-admin-field { display:grid; gap:.6rem; color:#171717; font-family:Geist,Arial,sans-serif; } .ds-admin-field span { font-size:.68rem; font-weight:750; letter-spacing:.09em; text-transform:uppercase; } .ds-admin-field input { border:0; border-bottom:1px solid #aaa69e; border-radius:0; padding:.75rem 0; background:transparent; color:inherit; font:inherit; } .ds-admin-field input:focus-visible { border-color:#b66f50; outline:2px solid #b66f50; outline-offset:4px; }"
+    },
+    {
+      "name": "Admin Gallery Row",
+      "kind": "list",
+      "description": "Fila visual a ancho completo para previsualización, descripción accesible, portada, orden y eliminación local; la cola permite quitar selecciones equivocadas antes de guardarlas.",
+      "html": "<article class=\"ds-gallery-row\"><div class=\"ds-gallery-media\"></div><div><strong>Portada</strong><label>Descripción de la imagen<input /></label><button>Guardar cambios en imágenes</button></div></article>",
+      "css": ".ds-gallery-row { display:grid; grid-template-columns:minmax(16rem,.7fr) minmax(18rem,1fr); gap:4rem; border-bottom:1px solid #aaa69e; padding:2.5rem 0; color:#171717; font-family:Geist,Arial,sans-serif; } .ds-gallery-media { aspect-ratio:4/3; background:#aaa69e; } .ds-gallery-row button { border:1px solid #161616; border-radius:0; padding:.75rem 1rem; background:#161616; color:#f5f2ec; }"
+    },
+    {
+      "name": "Admin Site Hero",
+      "kind": "media",
+      "description": "Gestor de portada independiente con previsualización 16:9, carga recuperable, descripción accesible y acciones explícitas.",
+      "html": "<section class=\"ds-site-hero\"><div class=\"ds-site-hero-preview\">075</div><div><label>Descripción de la imagen<input /></label><button>Reemplazar imagen</button></div></section>",
+      "css": ".ds-site-hero { display:grid; grid-template-columns:1.35fr .65fr; gap:4rem; border-bottom:1px solid #aaa69e; padding:2.5rem 0; color:#171717; font-family:Geist,Arial,sans-serif; } .ds-site-hero-preview { display:grid; min-height:22rem; aspect-ratio:16/9; place-items:center; background:#161616; color:#f5f2ec; font-size:6rem; } .ds-site-hero button { border:1px solid #161616; border-radius:0; padding:.75rem 1rem; background:#161616; color:#f5f2ec; }"
     }
   ],
   "narrative": {

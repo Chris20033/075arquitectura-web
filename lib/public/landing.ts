@@ -4,14 +4,25 @@ import { database } from "@/lib/db";
 import type { DatabaseClient } from "@/lib/db/client";
 
 import {
+  resolvePublicProjectImage,
+  type PublicProjectImage,
+} from "./project-images";
+
+import {
   normalizeEmailUrl,
   normalizeSocialUrl,
   normalizeWhatsAppUrl,
 } from "./contact";
+import {
+  socialLinkDisplayName,
+  type SocialNetwork,
+} from "@/lib/social-networks";
 
 export type PublicSocialLink = {
-  label: string;
-  url: string;
+  id: string;
+  platform: SocialNetwork;
+  username: string | null;
+  displayName: string;
   href: string | null;
 };
 
@@ -26,9 +37,12 @@ export type PublicSiteProfile = {
   socialLinks: PublicSocialLink[];
 };
 
+export type PublicHeroImage = PublicProjectImage;
+
 export type PublicLandingData = {
   mode: "demo" | "live";
   profile: PublicSiteProfile | null;
+  heroImage: PublicHeroImage | null;
 };
 
 export function getContentMode(value = process.env.SITE_CONTENT_MODE) {
@@ -46,23 +60,59 @@ export async function getPublicLandingData(
       whatsappPhone: true,
       publicEmail: true,
       publicPhone: true,
+      heroImage: {
+        select: {
+          mediaKey: true,
+          storageKind: true,
+          storageKey: true,
+          variants: true,
+          width: true,
+          height: true,
+          altText: true,
+        },
+      },
       socialLinks: {
         where: { isVisible: true },
         orderBy: { position: "asc" },
-        select: { label: true, url: true },
+        select: {
+          id: true,
+          platform: true,
+          username: true,
+          label: true,
+          url: true,
+        },
       },
     },
   });
 
+  const mode = getContentMode();
   return {
-    mode: getContentMode(),
+    mode,
+    heroImage: profile?.heroImage
+      ? resolvePublicProjectImage({
+          ...profile.heroImage,
+          position: 0,
+          isCover: true,
+        })
+      : null,
     profile: profile
       ? {
-          ...profile,
+          professionalName: profile.professionalName,
+          biography: profile.biography,
+          whatsappPhone: profile.whatsappPhone,
+          publicEmail: profile.publicEmail,
+          publicPhone: profile.publicPhone,
           whatsappHref: normalizeWhatsAppUrl(profile.whatsappPhone),
           emailHref: normalizeEmailUrl(profile.publicEmail),
           socialLinks: profile.socialLinks.map((link) => ({
-            ...link,
+            id: link.id,
+            platform: link.platform as SocialNetwork,
+            username: link.username,
+            displayName: socialLinkDisplayName({
+              platform: link.platform as SocialNetwork,
+              username: link.username,
+              label: link.label,
+            }),
             href: normalizeSocialUrl(link.url),
           })),
         }

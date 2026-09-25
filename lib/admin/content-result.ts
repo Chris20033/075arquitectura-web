@@ -9,6 +9,12 @@ export const adminActionCodes = [
   "CONFIRMATION_MISMATCH",
   "NOT_FOUND",
   "INVALID_ORDER",
+  "MEDIA_STORAGE_UNAVAILABLE",
+  "UPLOAD_INVALID",
+  "UPLOAD_LIMIT_REACHED",
+  "UPLOAD_CANCELLED",
+  "MEDIA_PROCESSING_FAILED",
+  "IMAGE_IS_COVER",
   "DATABASE_ERROR",
 ] as const;
 
@@ -48,7 +54,9 @@ export function successResult<T>(message: string, data?: T) {
   } satisfies AdminActionState<T>;
 }
 
-export function errorResult(error: unknown): AdminActionState {
+export function errorResult<T = undefined>(
+  error: unknown,
+): AdminActionState<T> {
   if (error instanceof AdminContentError) {
     return {
       ok: false,
@@ -58,7 +66,19 @@ export function errorResult(error: unknown): AdminActionState {
     };
   }
 
-  console.error("[admin-content] operation failed");
+  const diagnostic =
+    error instanceof Error
+      ? {
+          name: error.name,
+          code:
+            "code" in error && typeof error.code === "string"
+              ? error.code
+              : undefined,
+        }
+      : { name: "UnknownError", code: undefined };
+  console.error(
+    `[admin-content] operation failed name=${diagnostic.name} code=${diagnostic.code ?? "UNCLASSIFIED"}`,
+  );
   return {
     ok: false,
     code: "DATABASE_ERROR",

@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 
 import { AdminActionForm } from "@/components/admin/admin-action-form";
 import { ConfirmDialog } from "@/components/admin/confirm-dialog";
+import { ProjectGalleryManager } from "@/components/admin/project-gallery-manager";
 import {
   publishProjectAction,
   trashProjectAction,
@@ -14,16 +15,22 @@ import type { PublicationIssueCode } from "@/lib/projects/publication";
 
 type ProjectEditorPageProps = {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ estado?: string }>;
+  searchParams: Promise<{ estado?: string; paso?: string }>;
 };
+
+const editorSteps = [
+  { value: "informacion", label: "Información" },
+  { value: "imagenes", label: "Imágenes" },
+  { value: "revisar", label: "Revisar y publicar" },
+] as const;
 
 const issueLabels: Record<PublicationIssueCode, string> = {
   PROJECT_NOT_FOUND: "El proyecto no existe.",
   PROJECT_IN_TRASH: "El proyecto está en la papelera.",
   NAME_REQUIRED: "Añade un nombre.",
   SLUG_REQUIRED: "Genera un slug válido.",
-  IMAGE_REQUIRED: "Añade al menos una imagen en Sprint 7.",
-  COVER_REQUIRED: "Selecciona una portada en Sprint 7.",
+  IMAGE_REQUIRED: "Añade al menos una imagen.",
+  COVER_REQUIRED: "Selecciona una portada.",
   IMAGE_ALT_TEXT_REQUIRED:
     "Completa el texto alternativo de todas las imágenes.",
   IMAGE_DIMENSIONS_INVALID: "Corrige las dimensiones inválidas de la galería.",
@@ -37,6 +44,9 @@ export default async function ProjectEditorPage({
   const project = await getAdminProject(id);
   if (!project) notFound();
   const created = query.estado === "creado";
+  const step = editorSteps.some((item) => item.value === query.paso)
+    ? query.paso
+    : "informacion";
   const canPublish = project.publicationIssues.length === 0;
 
   return (
@@ -47,7 +57,9 @@ export default async function ProjectEditorPage({
             Volver a proyectos
           </Link>
           <h1 className="admin-page__title">{project.name}</h1>
-          <p className="admin-page__intro">/{project.slug}</p>
+          <p className="admin-page__intro">
+            Completa un paso a la vez. Puedes volver cuando lo necesites.
+          </p>
         </div>
         <span className="admin-status">
           {project.status === "PUBLISHED" ? "Publicado" : "Borrador"}
@@ -60,11 +72,25 @@ export default async function ProjectEditorPage({
         </p>
       ) : null}
 
-      <div className="admin-editor-layout">
+      <nav className="admin-step-nav" aria-label="Pasos del proyecto">
+        {editorSteps.map((item, index) => (
+          <Link
+            key={item.value}
+            href={`/admin/proyectos/${project.id}?paso=${item.value}`}
+            aria-current={step === item.value ? "step" : undefined}
+          >
+            <span>{index + 1}</span>
+            {item.label}
+          </Link>
+        ))}
+      </nav>
+
+      {step === "informacion" ? (
         <AdminActionForm
           action={updateProjectAction.bind(null, project.id)}
           className="admin-editor-form"
           submitLabel="Guardar ficha"
+          trackChanges
         >
           <input type="hidden" name="updatedAt" value={project.updatedAt} />
           <div className="admin-form-grid">
@@ -122,57 +148,61 @@ export default async function ProjectEditorPage({
           </div>
           <p className="admin-form-note">
             {project.publishedAt
-              ? "El slug quedó bloqueado al publicarse por primera vez."
-              : "El slug se actualizará desde el nombre hasta la primera publicación."}
+              ? "La dirección pública quedó fija cuando se publicó por primera vez."
+              : "La dirección pública se creará automáticamente a partir del nombre."}
           </p>
         </AdminActionForm>
+      ) : null}
 
-        <aside className="admin-editor-sidebar">
+      {step === "imagenes" ? (
+        <ProjectGalleryManager
+          key={project.updatedAt}
+          projectId={project.id}
+          projectName={project.name}
+          status={project.status}
+          images={project.images}
+        />
+      ) : null}
+
+      {step === "revisar" ? (
+        <div className="admin-editor-layout admin-editor-layout--review">
           <section className="admin-checklist">
-            <h2>Preparación editorial</h2>
+            <h2>Revisión antes de publicar</h2>
             {canPublish ? (
               <p className="admin-checklist__ready">
-                El proyecto está listo para publicar.
+                Todo está listo. Puedes publicar el proyecto.
               </p>
             ) : (
-              <ul>
+              <ul className="admin-checklist__tasks">
                 {project.publicationIssues.map((issue) => (
-                  <li key={issue}>{issueLabels[issue]}</li>
+                  <li key={issue}>
+                    <span>{issueLabels[issue]}</span>
+                    <Link
+                      href={`/admin/proyectos/${project.id}?paso=${
+                        [
+                          "IMAGE_REQUIRED",
+                          "COVER_REQUIRED",
+                          "IMAGE_ALT_TEXT_REQUIRED",
+                          "IMAGE_DIMENSIONS_INVALID",
+                        ].includes(issue)
+                          ? "imagenes"
+                          : "informacion"
+                      }`}
+                    >
+                      Corregir
+                    </Link>
+                  </li>
                 ))}
               </ul>
             )}
           </section>
 
-          <section className="admin-gallery-summary">
-            <div className="admin-section__header">
-              <h2>Galería</h2>
-              <span>Sprint 7</span>
-            </div>
-            <p>
-              {project.images.length === 0
-                ? "Todavía no hay imágenes."
-                : `${project.images.length} imágenes registradas.`}
-            </p>
-            {project.images.length > 0 ? (
-              <ol>
-                {project.images.map((image) => (
-                  <li key={image.id}>
-                    <span>{String(image.position + 1).padStart(2, "0")}</span>
-                    <span>
-                      {image.isCover ? "Portada" : "Imagen"} · {image.width}×
-                      {image.height}
-                    </span>
-                    <span>
-                      {image.altText?.trim() ? "Alt listo" : "Alt pendiente"}
-                    </span>
-                  </li>
-                ))}
-              </ol>
-            ) : null}
-          </section>
-
           <section className="admin-editor-actions">
-            <h2>Estado</h2>
+            <h2>
+              {project.status === "PUBLISHED"
+                ? "Proyecto publicado"
+                : "Publicar proyecto"}
+            </h2>
             {project.status === "DRAFT" ? (
               <ConfirmDialog
                 action={publishProjectAction.bind(null, project.id)}
@@ -193,18 +223,25 @@ export default async function ProjectEditorPage({
                 hiddenFields={{ updatedAt: project.updatedAt }}
               />
             )}
-            <ConfirmDialog
-              action={trashProjectAction.bind(null, project.id)}
-              title="Enviar a la papelera"
-              description="El proyecto se ocultará del sitio y conservará todas sus imágenes."
-              triggerLabel="Enviar a papelera"
-              confirmLabel="Mover a papelera"
-              tone="danger"
-              hiddenFields={{ updatedAt: project.updatedAt }}
-            />
+            <details className="admin-maintenance">
+              <summary>Más opciones</summary>
+              <p>
+                Usa la papelera si ya no quieres mostrar ni editar este
+                proyecto.
+              </p>
+              <ConfirmDialog
+                action={trashProjectAction.bind(null, project.id)}
+                title="Enviar a la papelera"
+                description="El proyecto se ocultará del sitio y conservará todas sus imágenes."
+                triggerLabel="Enviar a papelera"
+                confirmLabel="Mover a papelera"
+                tone="danger"
+                hiddenFields={{ updatedAt: project.updatedAt }}
+              />
+            </details>
           </section>
-        </aside>
-      </div>
+        </div>
+      ) : null}
     </article>
   );
 }

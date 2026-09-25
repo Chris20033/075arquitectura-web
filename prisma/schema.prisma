@@ -18,6 +18,24 @@ enum LoginThrottleScope {
   CLIENT
 }
 
+enum SocialPlatform {
+  INSTAGRAM
+  FACEBOOK
+  LINKEDIN
+  PINTEREST
+  TIKTOK
+  BEHANCE
+  HOUZZ
+  YOUTUBE
+  X
+  OTHER
+}
+
+enum MediaStorageKind {
+  BUNDLED
+  LOCAL
+}
+
 model AdminUser {
   id                String    @id @default(dbgenerated("uuidv7()")) @db.Uuid
   singletonKey      String    @unique @default("owner") @map("singleton_key") @db.VarChar(32)
@@ -43,13 +61,39 @@ model SiteProfile {
   createdAt        DateTime     @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt        DateTime     @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(3)
   socialLinks      SocialLink[]
+  heroImage        SiteHeroImage?
 
   @@map("site_profiles")
+}
+
+model SiteHeroImage {
+  id               String           @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  siteProfileId    String           @unique @map("site_profile_id") @db.Uuid
+  mediaKey         String           @unique @default(dbgenerated("uuidv7()")) @map("media_key") @db.Uuid
+  storageKind      MediaStorageKind @default(LOCAL) @map("storage_kind")
+  storageKey       String           @map("storage_key") @db.Text
+  originalFilename String           @map("original_filename") @db.VarChar(255)
+  originalFormat   String           @map("original_format") @db.VarChar(16)
+  originalBytes    BigInt           @map("original_bytes")
+  originalSha256   String?          @map("original_sha256") @db.Char(64)
+  width            Int
+  height           Int
+  displayFormat    String           @default("webp") @map("display_format") @db.VarChar(16)
+  variants         Json
+  uploadToken      String?          @unique @map("upload_token") @db.Uuid
+  altText          String           @map("alt_text") @db.VarChar(500)
+  createdAt        DateTime         @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt        DateTime         @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(3)
+  siteProfile      SiteProfile      @relation(fields: [siteProfileId], references: [id], onDelete: Cascade)
+
+  @@map("site_hero_images")
 }
 
 model SocialLink {
   id            String      @id @default(dbgenerated("uuidv7()")) @db.Uuid
   siteProfileId String      @map("site_profile_id") @db.Uuid
+  platform      SocialPlatform @default(OTHER)
+  username      String?     @db.VarChar(80)
   label         String      @db.VarChar(80)
   url           String      @db.Text
   position      Int
@@ -100,22 +144,26 @@ model Project {
 }
 
 model ProjectImage {
-  id                 String   @id @default(dbgenerated("uuidv7()")) @db.Uuid
-  projectId          String   @map("project_id") @db.Uuid
-  cloudinaryAssetId  String   @unique @map("cloudinary_asset_id") @db.VarChar(255)
-  cloudinaryPublicId String   @unique @map("cloudinary_public_id") @db.VarChar(255)
-  cloudinaryVersion  BigInt   @map("cloudinary_version")
-  secureUrl          String   @map("secure_url") @db.Text
-  format             String   @db.VarChar(32)
-  width              Int
-  height             Int
-  bytes              BigInt
-  altText            String?  @map("alt_text") @db.VarChar(500)
-  position           Int
-  isCover            Boolean  @default(false) @map("is_cover")
-  createdAt          DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt          DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(3)
-  project            Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  id               String           @id @default(dbgenerated("uuidv7()")) @db.Uuid
+  projectId        String           @map("project_id") @db.Uuid
+  mediaKey         String           @unique @default(dbgenerated("uuidv7()")) @map("media_key") @db.Uuid
+  storageKind      MediaStorageKind @default(LOCAL) @map("storage_kind")
+  storageKey       String           @map("storage_key") @db.Text
+  originalFilename String           @map("original_filename") @db.VarChar(255)
+  originalFormat   String           @map("original_format") @db.VarChar(16)
+  originalBytes    BigInt           @map("original_bytes")
+  originalSha256   String?          @map("original_sha256") @db.Char(64)
+  width            Int
+  height           Int
+  displayFormat    String           @default("webp") @map("display_format") @db.VarChar(16)
+  variants         Json
+  uploadToken      String?          @unique @map("upload_token") @db.Uuid
+  altText          String?          @map("alt_text") @db.VarChar(500)
+  position         Int
+  isCover          Boolean          @default(false) @map("is_cover")
+  createdAt        DateTime         @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt        DateTime         @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(3)
+  project          Project          @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
   @@unique([projectId, position], map: "project_images_project_position_key")
   @@unique([projectId], map: "project_images_one_cover_key", where: { isCover: true })
