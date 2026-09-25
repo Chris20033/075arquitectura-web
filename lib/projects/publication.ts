@@ -8,6 +8,7 @@ export const publicationIssueCodes = [
   "IMAGE_REQUIRED",
   "COVER_REQUIRED",
   "IMAGE_ALT_TEXT_REQUIRED",
+  "IMAGE_DIMENSIONS_INVALID",
 ] as const;
 
 export type PublicationIssueCode = (typeof publicationIssueCodes)[number];
@@ -19,6 +20,8 @@ export type PublicationCandidate = {
   images: Array<{
     altText: string | null;
     isCover: boolean;
+    width?: number;
+    height?: number;
   }>;
 };
 
@@ -36,6 +39,15 @@ export function getPublicationIssuesForCandidate(
   }
   if (project.images.some((image) => !image.altText?.trim())) {
     issues.push("IMAGE_ALT_TEXT_REQUIRED");
+  }
+  if (
+    project.images.some(
+      (image) =>
+        (image.width !== undefined && image.width <= 0) ||
+        (image.height !== undefined && image.height <= 0),
+    )
+  ) {
+    issues.push("IMAGE_DIMENSIONS_INVALID");
   }
 
   return issues;
@@ -55,6 +67,8 @@ export async function getPublicationIssues(
         select: {
           altText: true,
           isCover: true,
+          width: true,
+          height: true,
         },
       },
     },

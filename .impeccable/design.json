@@ -1,0 +1,195 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-09-21T00:00:00.000Z",
+  "title": "Design System: 075arquitectura",
+  "extensions": {
+    "colorMeta": {
+      "terracotta-signal": {
+        "role": "primary",
+        "displayName": "Terracota señal",
+        "canonical": "#b66f50",
+        "tonalRamp": [
+          "#32170f",
+          "#572a1d",
+          "#7b4430",
+          "#9b5b42",
+          "#b66f50",
+          "#cc937a",
+          "#dfb9a8",
+          "#f3e4dd"
+        ]
+      },
+      "warm-paper": {
+        "role": "neutral",
+        "displayName": "Papel cálido",
+        "canonical": "#ebe8e1",
+        "tonalRamp": [
+          "#292824",
+          "#484641",
+          "#696760",
+          "#8c8981",
+          "#aaa69e",
+          "#cbc7bf",
+          "#ebe8e1",
+          "#faf8f4"
+        ]
+      },
+      "architectural-black": {
+        "role": "neutral",
+        "displayName": "Negro arquitectónico",
+        "canonical": "#161616",
+        "tonalRamp": [
+          "#080808",
+          "#161616",
+          "#343434",
+          "#545454",
+          "#777777",
+          "#a1a1a1",
+          "#d0d0d0",
+          "#f1f1f1"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display monumental",
+        "purpose": "Marca y títulos de sección."
+      },
+      "headline": {
+        "displayName": "Manifiesto",
+        "purpose": "Propuestas editoriales de una frase."
+      },
+      "body": {
+        "displayName": "Lectura",
+        "purpose": "Descripción y contenido continuo."
+      },
+      "label": {
+        "displayName": "Nota de lámina",
+        "purpose": "Navegación, captions y metadatos."
+      }
+    },
+    "shadows": [],
+    "motion": [
+      {
+        "name": "editorial-reveal",
+        "value": "cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "Revelado del hero y ampliación contenida de imágenes."
+      },
+      {
+        "name": "state",
+        "value": "180ms ease",
+        "purpose": "Hover, foco y cambios breves de estado."
+      }
+    ],
+    "breakpoints": [
+      { "name": "tablet", "value": "900px" },
+      { "name": "mobile", "value": "700px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Contact Action",
+      "kind": "button",
+      "refersTo": "contact-action",
+      "description": "Acción primaria tipográfica sobre el campo terracota.",
+      "html": "<a class=\"ds-contact-action\" href=\"#\">Escribir por WhatsApp</a>",
+      "css": ".ds-contact-action { display:inline-flex; min-height:3rem; align-items:center; gap:1rem; border-bottom:1px solid currentColor; color:#171717; font:700 .78rem Geist,Arial,sans-serif; letter-spacing:.09em; text-decoration:none; text-transform:uppercase; transition:gap 220ms cubic-bezier(.16,1,.3,1); } .ds-contact-action:hover { gap:1.5rem; } .ds-contact-action:focus-visible { outline:2px solid #171717; outline-offset:5px; }"
+    },
+    {
+      "name": "Editorial Navigation",
+      "kind": "nav",
+      "description": "Destinos distribuidos sobre la fotografía.",
+      "html": "<nav class=\"ds-nav\"><a href=\"#\">Proyectos</a><a href=\"#\">Estudio</a><a href=\"#\">Contacto</a></nav>",
+      "css": ".ds-nav { display:grid; grid-template-columns:repeat(3,1fr); gap:2rem; width:100%; background:#161616; padding:1.5rem; } .ds-nav a { color:#f5f2ec; font:760 .72rem Geist,Arial,sans-serif; letter-spacing:.07em; text-align:center; text-decoration:none; text-transform:uppercase; transition:opacity 180ms ease; } .ds-nav a:hover { opacity:.62; } .ds-nav a:focus-visible { outline:2px solid #b66f50; outline-offset:5px; }"
+    },
+    {
+      "name": "Project Figure",
+      "kind": "card",
+      "description": "Enlace de proyecto dentro de una banda horizontal con recorte cinematográfico, caption y regla; la siguiente obra permanece parcialmente visible.",
+      "html": "<figure class=\"ds-project\"><div><span>01</span></div><figcaption><span>Estudio de luz</span><span>Interior · Demo</span></figcaption></figure>",
+      "css": ".ds-project { width:min(72vw,68rem); margin:0; color:#171717; font-family:Geist,Arial,sans-serif; scroll-snap-align:start; } .ds-project div { position:relative; aspect-ratio:16/10; background:#aaa69e; } .ds-project div span { position:absolute; top:1rem; left:1rem; display:grid; width:2.75rem; height:2.75rem; place-items:center; background:#161616; color:#f5f2ec; font-size:.66rem; } .ds-project figcaption { display:flex; justify-content:space-between; gap:1rem; border-bottom:1px solid #aaa69e; padding:.95rem 0 .8rem; font-size:.68rem; font-weight:720; letter-spacing:.08em; text-transform:uppercase; } .ds-project figcaption span:last-child { color:#6b6862; text-align:right; }"
+    },
+    {
+      "name": "Project Detail Navigation",
+      "kind": "nav",
+      "description": "Cierre oscuro que enlaza obras adyacentes según el orden público, sin miniaturas ni contenedores flotantes.",
+      "html": "<nav class=\"ds-adjacent\"><a href=\"#\"><span>Anterior</span><strong>Casa Luz</strong></a><a href=\"#\"><span>Siguiente</span><strong>Casa Umbral</strong></a></nav>",
+      "css": ".ds-adjacent { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); background:#161616; color:#f5f2ec; } .ds-adjacent a { min-height:19rem; display:flex; flex-direction:column; justify-content:space-between; border-right:1px solid #4a4a4a; padding:2rem; color:inherit; text-decoration:none; } .ds-adjacent span { color:#bdb9b1; font:720 .66rem Geist,Arial,sans-serif; letter-spacing:.1em; text-transform:uppercase; } .ds-adjacent strong { max-width:13ch; font:540 3rem/.95 Geist,Arial,sans-serif; letter-spacing:-.04em; }"
+    },
+    {
+      "name": "Project Detail Gallery",
+      "kind": "media",
+      "description": "Cuadrícula editorial uniforme con miniaturas 4:3 y visor oscuro que recupera el encuadre completo mediante botones, teclado o swipe.",
+      "html": "<div class=\"ds-detail-gallery\"><figure><button><img alt=\"Vista del patio\" /></button><figcaption><span>01</span><span>Vista del patio</span></figcaption></figure></div>",
+      "css": ".ds-detail-gallery { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:2rem 1rem; color:#171717; font-family:Geist,Arial,sans-serif; } .ds-detail-gallery figure { margin:0; } .ds-detail-gallery button { width:100%; aspect-ratio:4/3; overflow:hidden; border:0; padding:0; background:#aaa69e; } .ds-detail-gallery img { width:100%; height:100%; object-fit:cover; } .ds-detail-gallery figcaption { display:grid; grid-template-columns:3rem 1fr; gap:1rem; border-bottom:1px solid #aaa69e; padding:.9rem 0; color:#6b6862; font-size:.68rem; }"
+    },
+    {
+      "name": "Admin Operation Row",
+      "kind": "list",
+      "description": "Fila operativa sin tarjeta para estado, identidad, categoría, metadatos y acceso a edición.",
+      "html": "<a class=\"ds-admin-row\" href=\"#\"><span>Publicado</span><strong>Casa Luz</strong><span>Residencial</span><time>21 sept 2026</time></a>",
+      "css": ".ds-admin-row { display:grid; grid-template-columns:7rem minmax(12rem,1fr) minmax(8rem,.6fr) 8rem; gap:1.5rem; align-items:center; border-bottom:1px solid #aaa69e; padding:1.25rem 0; color:#171717; font:400 .8rem Geist,Arial,sans-serif; text-decoration:none; } .ds-admin-row strong { font-size:1rem; font-weight:620; } .ds-admin-row > span:first-child { color:#315c45; font-size:.65rem; font-weight:750; letter-spacing:.08em; text-transform:uppercase; }"
+    },
+    {
+      "name": "Admin Field",
+      "kind": "input",
+      "description": "Campo amplio sobre papel con etiqueta de lámina, regla inferior y foco terracota.",
+      "html": "<label class=\"ds-admin-field\"><span>Nombre</span><input value=\"Casa Luz\" /></label>",
+      "css": ".ds-admin-field { display:grid; gap:.6rem; color:#171717; font-family:Geist,Arial,sans-serif; } .ds-admin-field span { font-size:.68rem; font-weight:750; letter-spacing:.09em; text-transform:uppercase; } .ds-admin-field input { border:0; border-bottom:1px solid #aaa69e; border-radius:0; padding:.75rem 0; background:transparent; color:inherit; font:inherit; } .ds-admin-field input:focus-visible { border-color:#b66f50; outline:2px solid #b66f50; outline-offset:4px; }"
+    },
+    {
+      "name": "Admin Gallery Row",
+      "kind": "list",
+      "description": "Fila visual a ancho completo para previsualización, descripción accesible, portada, orden y eliminación local; la cola permite quitar selecciones equivocadas antes de guardarlas.",
+      "html": "<article class=\"ds-gallery-row\"><div class=\"ds-gallery-media\"></div><div><strong>Portada</strong><label>Descripción de la imagen<input /></label><button>Guardar cambios en imágenes</button></div></article>",
+      "css": ".ds-gallery-row { display:grid; grid-template-columns:minmax(16rem,.7fr) minmax(18rem,1fr); gap:4rem; border-bottom:1px solid #aaa69e; padding:2.5rem 0; color:#171717; font-family:Geist,Arial,sans-serif; } .ds-gallery-media { aspect-ratio:4/3; background:#aaa69e; } .ds-gallery-row button { border:1px solid #161616; border-radius:0; padding:.75rem 1rem; background:#161616; color:#f5f2ec; }"
+    },
+    {
+      "name": "Admin Site Hero",
+      "kind": "media",
+      "description": "Gestor de portada independiente con previsualización 16:9, carga recuperable, descripción accesible y acciones explícitas.",
+      "html": "<section class=\"ds-site-hero\"><div class=\"ds-site-hero-preview\">075</div><div><label>Descripción de la imagen<input /></label><button>Reemplazar imagen</button></div></section>",
+      "css": ".ds-site-hero { display:grid; grid-template-columns:1.35fr .65fr; gap:4rem; border-bottom:1px solid #aaa69e; padding:2.5rem 0; color:#171717; font-family:Geist,Arial,sans-serif; } .ds-site-hero-preview { display:grid; min-height:22rem; aspect-ratio:16/9; place-items:center; background:#161616; color:#f5f2ec; font-size:6rem; } .ds-site-hero button { border:1px solid #161616; border-radius:0; padding:.75rem 1rem; background:#161616; color:#f5f2ec; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "El archivo habitable",
+    "overview": "El sistema traduce la disciplina de un plano editorial a una experiencia de portafolio. Grandes campos de papel, reglas finas, tipografía monumental y fotografías materiales construyen una presencia sobria que desaparece cuando la obra necesita hablar.",
+    "keyCharacteristics": [
+      "Escala tipográfica monumental con una sola familia sans.",
+      "Composición asimétrica, reglas de dibujo y espacio negativo generoso.",
+      "Fotografía a sangre con materialidad cálida y realista.",
+      "Terracota reservado para señal, foco y cierre.",
+      "Movimiento breve que revela, nunca entretiene."
+    ],
+    "rules": [
+      {
+        "name": "The Signal Rule",
+        "body": "El terracota señala una decisión o un destino; su rareza preserva su fuerza.",
+        "section": "colors"
+      },
+      {
+        "name": "The Single Voice Rule",
+        "body": "No se introduce una serif decorativa; el contraste nace de escala, peso y espacio.",
+        "section": "typography"
+      },
+      {
+        "name": "The Material Depth Rule",
+        "body": "Las imágenes y los cambios de superficie crean profundidad; las cajas no flotan.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do usar imágenes con proporciones reservadas y descripciones significativas.",
+      "Do mantener el terracota como señal y el papel como campo principal.",
+      "Do construir jerarquía con escala, reglas y espacio negativo.",
+      "Do retirar máscaras y desplazamientos cuando se prefiera movimiento reducido."
+    ],
+    "donts": [
+      "Don't usar gradientes, glassmorphism, sombras decorativas o tarjetas genéricas.",
+      "Don't introducir serif, iconos emoji ni recursos externos de imagen.",
+      "Don't presentar contenido conceptual o datos .test como obra o contacto real.",
+      "Don't convertir el panel administrativo en una extensión visual del hero público."
+    ]
+  }
+}

@@ -1,14 +1,14 @@
 # 075arquitectura
 
-Aplicación integral en Next.js para el portafolio público y la futura administración privada de 075arquitectura. Este repositorio contiene la base técnica y de persistencia del Sprint 2; todavía no incluye autenticación, CRUD, API pública ni el rediseño visual.
+Aplicación integral en Next.js para el portafolio público y el panel privado de 075arquitectura. Usa PostgreSQL y almacenamiento local persistente para las imágenes; no depende de un backend separado ni de un proveedor de medios externo.
 
 ## Requisitos
 
-- Node.js `24.11.0` (ver `.nvmrc`).
-- npm `11.6.1`.
+- Node.js `24.11.0` y npm `11.6.1`.
 - Docker con Compose para PostgreSQL local.
+- En producción: Docker sobre Ubuntu, un reverse proxy y un volumen persistente para imágenes.
 
-Las versiones de Next.js, Prisma y demás paquetes están bloqueadas en `package-lock.json`. Instala siempre con:
+Instala siempre las dependencias en el sistema donde se ejecutará la aplicación; no copies `node_modules` entre Windows y Linux.
 
 ```bash
 npm ci
@@ -16,72 +16,82 @@ npm ci
 
 ## Configuración local
 
-1. Copia `.env.example` como `.env`.
-2. Conserva las URLs locales incluidas o cambia únicamente las credenciales de desarrollo.
-3. Inicia PostgreSQL:
+El archivo `..\.env` es el respaldo manual y `.\.env` es la copia activa. Ambos están fuera de Git. Para restaurar el activo en PowerShell:
+
+```powershell
+Copy-Item -LiteralPath '..\.env' -Destination '.\.env'
+```
+
+Durante desarrollo usa `UPLOADS_ROOT="./uploads"`. El directorio es privado por defecto: el navegador solo accede a variantes WebP autorizadas mediante `/media/...`; el original nunca tiene una URL pública.
 
 ```bash
 docker compose up -d postgres postgres-test
-```
-
-4. Prepara la base de desarrollo:
-
-```bash
 npm run db:migrate:deploy
 npm run db:seed
-```
-
-5. Inicia Next.js:
-
-```bash
 npm run dev
 ```
 
-La aplicación queda disponible en `http://localhost:3000`. PostgreSQL de desarrollo escucha solo en `127.0.0.1:5432`; la instancia de pruebas, solo en `127.0.0.1:5433`.
+La aplicación queda en `http://localhost:3000`. PostgreSQL de desarrollo escucha en `127.0.0.1:5432` y la base aislada de pruebas en `127.0.0.1:5433`.
 
-## Flujo reproducible del Sprint 2
+## Imágenes
 
-Con los dos servicios de PostgreSQL saludables y el archivo `.env` creado:
+Se aceptan JPEG, PNG y WebP de hasta 20 MB y cualquier resolución positiva. Un proyecto admite 30 imágenes y el navegador transfiere hasta tres en paralelo; Sharp procesa una a la vez para proteger CPU y memoria.
 
-```bash
-npm ci
-npm run db:migrate:deploy
-npm run db:seed
-npm run check
-npm run db:status
-```
+Por cada carga se conserva el original exacto de forma privada y se generan, sin ampliación, hasta cinco archivos públicos WebP:
 
-`npm run check` comprueba formato, lint, tipos, integración contra una base de pruebas reiniciada y el build de producción. El reset de pruebas se niega a operar salvo que la URL use `localhost` o `127.0.0.1`, el puerto `5433` y un nombre terminado en `_test`.
+| Archivo        | Ancho máximo | Uso                     |
+| -------------- | -----------: | ----------------------- |
+| `mobile.webp`  |       480 px | Celular                 |
+| `tablet.webp`  |       768 px | Tablet                  |
+| `laptop.webp`  |      1280 px | Portátil                |
+| `desktop.webp` |      1920 px | Escritorio              |
+| `wide.webp`    |      2560 px | Pantalla grande y visor |
 
-## Base de datos
+Una imagen menor de 480 px genera únicamente `mobile.webp` a su resolución original. El procesamiento corrige orientación, elimina EXIF/GPS y conserva transparencia. Las fotografías usan WebP calidad 88; planos y PNG usan WebP near-lossless.
 
-- `npm run db:generate`: regenera el cliente Prisma en `generated/prisma`.
-- `npm run db:migrate`: crea/aplica migraciones durante desarrollo.
-- `npm run db:migrate:deploy`: aplica migraciones ya versionadas.
-- `npm run db:status`: muestra el estado de migraciones.
-- `npm run db:seed`: carga fixtures ficticios e idempotentes, sin administradora.
-- `npm run db:test:reset`: reconstruye y puebla exclusivamente la base de pruebas.
-- `npm run test:integration`: reconstruye la base de pruebas y ejecuta Vitest en serie.
+Las rutas guardadas en PostgreSQL son relativas y opacas. `uploads/` está ignorado por Git y contiene `projects/`, `site/hero`, `.tmp` y `.trash`. El original no se acepta como variante de `/media`; solo `mobile`, `tablet`, `laptop`, `desktop` y `wide` pueden entregarse. Las cancelaciones se marcan y reconcilian en servidor para retirar una imagen aunque el navegador ya haya terminado de transferirla. La herramienta **Limpiar cargas incompletas** retira temporales, marcadores y papelera interna de más de 24 horas.
 
-No se usa `prisma db push` como sustituto de las migraciones. Los metadatos de imágenes del seed son falsos, usan `example.invalid` y no realizan cargas a Cloudinary.
-
-## Creación privada de la administradora
-
-Define temporalmente `ADMIN_EMAIL` y `ADMIN_PASSWORD` en el entorno y ejecuta:
+Antes de aplicar la migración que elimina las columnas antiguas puede generarse un inventario local, ignorado por Git:
 
 ```bash
-npm run db:bootstrap-admin
+npm run media:legacy-report
 ```
 
-La contraseña debe tener entre 15 y 128 caracteres. El comando normaliza el correo, genera un hash Argon2id y rechaza sobrescribir la cuenta o crear una segunda administradora. Nunca imprime la contraseña ni el hash.
+El reporte no descarga ni elimina recursos remotos. Las imágenes reales anteriores deben volver a cargarse manualmente.
 
-## Seguridad
+## Base de datos y administradora
 
-- `.env` y todos los secretos reales están ignorados por Git.
-- Las credenciales de `compose.yaml` son exclusivamente locales y no son aptas para producción.
-- No reutilices contraseñas de producción en desarrollo o pruebas.
-- No apuntes `TEST_DATABASE_URL` a una base remota: el mecanismo de seguridad también lo rechazará.
-- El cliente Prisma compartido es exclusivo del servidor; no debe importarse desde componentes cliente.
+- `npm run db:generate`: genera el cliente Prisma.
+- `npm run db:migrate`: crea y aplica migraciones durante desarrollo.
+- `npm run db:migrate:deploy`: aplica migraciones versionadas.
+- `npm run db:status`: comprueba su estado.
+- `npm run db:seed`: carga contenido ficticio idempotente, sin administradora.
+- `npm run db:test:reset`: reconstruye solo la base local terminada en `_test` del puerto `5433`.
+
+Para crear la única administradora define `ADMIN_EMAIL` y `ADMIN_PASSWORD` y ejecuta `npm run db:bootstrap-admin`. La contraseña debe tener entre 15 y 128 caracteres; el comando nunca imprime la contraseña ni el hash.
+
+## Despliegue en Ubuntu
+
+`next.config.ts` genera una salida standalone. `compose.production.yaml` monta:
+
+```text
+/srv/075arquitectura/uploads:/data/uploads
+```
+
+La aplicación corre como usuario no privilegiado y usa `UPLOADS_ROOT=/data/uploads`. Crea el directorio del host con propietario y permisos compatibles antes de iniciar el contenedor. El puerto `3000` se publica solo en loopback para que el reverse proxy sea el único punto de entrada.
+
+Copia `.env.production.example` como `.env.production`, reemplaza todos los valores de ejemplo y no versiones el archivo resultante. `DATABASE_URL` usa el hostname interno `postgres`; las variables `POSTGRES_*` inicializan únicamente el contenedor de base.
+
+El proxy debe permitir algo más de 20 MB por solicitud, dar tiempo al procesamiento y sobrescribir `X-Real-IP`/`X-Forwarded-For`. Los respaldos deben incluir en el mismo ciclo PostgreSQL y `/srv/075arquitectura/uploads`. No se usa Vercel.
+
+## Seguridad y comportamiento público
+
+- `/admin` requiere una sesión cifrada de ocho horas y revalida la cuenta en PostgreSQL.
+- Todas las lecturas y mutaciones privadas se autorizan en servidor.
+- Borradores y papelera solo entregan medios a una administradora autenticada.
+- Proyectos publicados y hero usan URLs inmutables con caché prolongada apta para Cloudflare.
+- No existe API pública de negocio, registro público ni recuperación automática de contraseña.
+- `.env`, `uploads/` y secretos reales nunca se versionan.
 
 ## Calidad
 
@@ -90,7 +100,10 @@ npm run format:check
 npm run lint
 npm run typecheck
 npm run test:integration
+npm run db:status
 npm run build
 ```
 
-El formato puede corregirse con `npm run format`. La página inicial del scaffold se conserva intencionalmente hasta el sprint de sistema visual.
+`npm run check` ejecuta formato, lint, tipos, pruebas de integración y build. El seed usa exclusivamente recursos conceptuales incluidos en `public/images`; no realiza cargas externas.
+
+`npm audit --omit=dev` conserva cuatro avisos altos transitivos de la herramienta Prisma (`deepmerge-ts` y `mysql2`). La corrección automática propone degradar Prisma a la versión 6, por lo que no se ejecuta `npm audit fix --force`; Sharp ya está fijado en `0.35.4`, que corrige los avisos de libvips/libheif detectados durante esta migración.

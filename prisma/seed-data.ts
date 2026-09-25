@@ -1,6 +1,6 @@
 import argon2 from "argon2";
 
-import { ProjectStatus } from "../generated/prisma/enums";
+import { MediaStorageKind, ProjectStatus } from "../generated/prisma/enums";
 import type { DatabaseClient } from "../lib/db/client";
 
 export type SeedMode = "development" | "test";
@@ -10,6 +10,7 @@ export async function seedDatabase(
   options: { mode: SeedMode; reset?: boolean },
 ) {
   if (options.reset) {
+    await database.loginThrottle.deleteMany();
     await database.project.deleteMany();
     await database.category.deleteMany();
     await database.socialLink.deleteMany();
@@ -21,7 +22,8 @@ export async function seedDatabase(
     where: { singletonKey: "default" },
     update: {
       professionalName: "075arquitectura — perfil de demostración",
-      biography: "Contenido ficticio para desarrollo y pruebas.",
+      biography:
+        "Estudio de demostración enfocado en espacios contemporáneos, materialidad honesta y una lectura atenta de cada contexto.",
       whatsappPhone: "+520000000000",
       publicEmail: "contacto@075arquitectura.test",
       publicPhone: "+520000000000",
@@ -29,7 +31,8 @@ export async function seedDatabase(
     create: {
       singletonKey: "default",
       professionalName: "075arquitectura — perfil de demostración",
-      biography: "Contenido ficticio para desarrollo y pruebas.",
+      biography:
+        "Estudio de demostración enfocado en espacios contemporáneos, materialidad honesta y una lectura atenta de cada contexto.",
       whatsappPhone: "+520000000000",
       publicEmail: "contacto@075arquitectura.test",
       publicPhone: "+520000000000",
@@ -37,8 +40,18 @@ export async function seedDatabase(
   });
 
   const socialLinks = [
-    { label: "Instagram de prueba", url: "https://example.invalid/instagram" },
-    { label: "Pinterest de prueba", url: "https://example.invalid/pinterest" },
+    {
+      platform: "INSTAGRAM" as const,
+      username: "075arquitectura_demo",
+      label: "Instagram",
+      url: "https://example.invalid/instagram",
+    },
+    {
+      platform: "PINTEREST" as const,
+      username: "075arquitectura_demo",
+      label: "Pinterest",
+      url: "https://example.invalid/pinterest",
+    },
   ];
 
   for (const [position, socialLink] of socialLinks.entries()) {
@@ -114,13 +127,69 @@ export async function seedDatabase(
     },
   });
 
+  const patioProject = await database.project.upsert({
+    where: { slug: "patio-de-tierra-demo" },
+    update: {
+      categoryId: residential.id,
+      name: "Patio de Tierra demo",
+      description:
+        "Pabellón ficticio organizado por umbrales de ladrillo, sombra profunda y vegetación de bajo consumo.",
+      year: 2025,
+      location: "Ubicación de prueba",
+      status: ProjectStatus.PUBLISHED,
+      position: 1,
+      publishedAt: new Date("2026-01-11T12:00:00.000Z"),
+      deletedAt: null,
+    },
+    create: {
+      categoryId: residential.id,
+      name: "Patio de Tierra demo",
+      slug: "patio-de-tierra-demo",
+      description:
+        "Pabellón ficticio organizado por umbrales de ladrillo, sombra profunda y vegetación de bajo consumo.",
+      year: 2025,
+      location: "Ubicación de prueba",
+      status: ProjectStatus.PUBLISHED,
+      position: 1,
+      publishedAt: new Date("2026-01-11T12:00:00.000Z"),
+    },
+  });
+
+  const thresholdProject = await database.project.upsert({
+    where: { slug: "casa-umbral-demo" },
+    update: {
+      categoryId: renovation.id,
+      name: "Casa Umbral demo",
+      description:
+        "Remodelación ficticia que enlaza habitaciones y patios mediante una secuencia de vanos, piedra clara y madera oscura.",
+      year: 2024,
+      location: "Ubicación de prueba",
+      status: ProjectStatus.PUBLISHED,
+      position: 2,
+      publishedAt: new Date("2026-01-12T12:00:00.000Z"),
+      deletedAt: null,
+    },
+    create: {
+      categoryId: renovation.id,
+      name: "Casa Umbral demo",
+      slug: "casa-umbral-demo",
+      description:
+        "Remodelación ficticia que enlaza habitaciones y patios mediante una secuencia de vanos, piedra clara y madera oscura.",
+      year: 2024,
+      location: "Ubicación de prueba",
+      status: ProjectStatus.PUBLISHED,
+      position: 2,
+      publishedAt: new Date("2026-01-12T12:00:00.000Z"),
+    },
+  });
+
   const draftProject = await database.project.upsert({
     where: { slug: "estudio-borrador-demo" },
     update: {
       categoryId: renovation.id,
       name: "Estudio borrador demo",
       status: ProjectStatus.DRAFT,
-      position: 1,
+      position: 3,
       publishedAt: null,
       deletedAt: null,
     },
@@ -129,7 +198,7 @@ export async function seedDatabase(
       name: "Estudio borrador demo",
       slug: "estudio-borrador-demo",
       status: ProjectStatus.DRAFT,
-      position: 1,
+      position: 3,
     },
   });
 
@@ -139,7 +208,7 @@ export async function seedDatabase(
       categoryId: residential.id,
       name: "Proyecto papelera demo",
       status: ProjectStatus.PUBLISHED,
-      position: 2,
+      position: 4,
       publishedAt: new Date("2025-05-01T12:00:00.000Z"),
       deletedAt: new Date("2026-02-01T12:00:00.000Z"),
     },
@@ -148,7 +217,7 @@ export async function seedDatabase(
       name: "Proyecto papelera demo",
       slug: "proyecto-papelera-demo",
       status: ProjectStatus.PUBLISHED,
-      position: 2,
+      position: 4,
       publishedAt: new Date("2025-05-01T12:00:00.000Z"),
       deletedAt: new Date("2026-02-01T12:00:00.000Z"),
     },
@@ -157,56 +226,131 @@ export async function seedDatabase(
   const images = [
     {
       projectId: publishedProject.id,
-      cloudinaryAssetId: "demo-asset-published-cover",
-      cloudinaryPublicId: "075arquitectura/demo/casa-luz-cover",
-      cloudinaryVersion: 1n,
-      secureUrl: "https://example.invalid/cloudinary/casa-luz-cover.jpg",
-      format: "jpg",
-      width: 1800,
-      height: 1200,
-      bytes: 350000n,
+      storageKind: MediaStorageKind.BUNDLED,
+      storageKey: "/images/concept/courtyard-house-demo.webp",
+      originalFilename: "courtyard-house-demo.webp",
+      originalFormat: "webp",
+      originalSha256: null,
+      displayFormat: "webp",
+      variants: [],
+      width: 1774,
+      height: 887,
+      originalBytes: 324070n,
       altText: "Render exterior ficticio de Casa Luz.",
       position: 0,
       isCover: true,
     },
     {
       projectId: publishedProject.id,
-      cloudinaryAssetId: "demo-asset-published-gallery",
-      cloudinaryPublicId: "075arquitectura/demo/casa-luz-gallery",
-      cloudinaryVersion: 1n,
-      secureUrl: "https://example.invalid/cloudinary/casa-luz-gallery.jpg",
-      format: "jpg",
-      width: 1600,
-      height: 1200,
-      bytes: 280000n,
+      storageKind: MediaStorageKind.BUNDLED,
+      storageKey: "/images/concept/stair-interior-demo.webp",
+      originalFilename: "stair-interior-demo.webp",
+      originalFormat: "webp",
+      originalSha256: null,
+      displayFormat: "webp",
+      variants: [],
+      width: 1024,
+      height: 1536,
+      originalBytes: 166064n,
       altText: "Vista interior ficticia de Casa Luz.",
       position: 1,
       isCover: false,
     },
     {
+      projectId: patioProject.id,
+      storageKind: MediaStorageKind.BUNDLED,
+      storageKey: "/images/concept/brick-pavilion-demo.webp",
+      originalFilename: "brick-pavilion-demo.webp",
+      originalFormat: "webp",
+      originalSha256: null,
+      displayFormat: "webp",
+      variants: [],
+      width: 1448,
+      height: 1086,
+      originalBytes: 356504n,
+      altText:
+        "Vista conceptual de un pabellón de ladrillo abierto hacia un jardín seco.",
+      position: 0,
+      isCover: true,
+    },
+    {
+      projectId: patioProject.id,
+      storageKind: MediaStorageKind.BUNDLED,
+      storageKey: "/images/concept/patio-tierra-detail-demo.webp",
+      originalFilename: "patio-tierra-detail-demo.webp",
+      originalFormat: "webp",
+      originalSha256: null,
+      displayFormat: "webp",
+      variants: [],
+      width: 1536,
+      height: 1024,
+      originalBytes: 240438n,
+      altText:
+        "Detalle conceptual del encuentro entre celosía de ladrillo, concreto y patio.",
+      position: 1,
+      isCover: false,
+    },
+    {
+      projectId: thresholdProject.id,
+      storageKind: MediaStorageKind.BUNDLED,
+      storageKey: "/images/concept/casa-umbral-cover-demo.webp",
+      originalFilename: "casa-umbral-cover-demo.webp",
+      originalFormat: "webp",
+      originalSha256: null,
+      displayFormat: "webp",
+      variants: [],
+      width: 1536,
+      height: 1024,
+      originalBytes: 230584n,
+      altText:
+        "Vista conceptual de una casa articulada por umbrales hacia un patio arbolado.",
+      position: 0,
+      isCover: true,
+    },
+    {
+      projectId: thresholdProject.id,
+      storageKind: MediaStorageKind.BUNDLED,
+      storageKey: "/images/concept/casa-umbral-stair-demo.webp",
+      originalFilename: "casa-umbral-stair-demo.webp",
+      originalFormat: "webp",
+      originalSha256: null,
+      displayFormat: "webp",
+      variants: [],
+      width: 1122,
+      height: 1402,
+      originalBytes: 211158n,
+      altText: "Escalera conceptual de piedra iluminada por un patio interior.",
+      position: 1,
+      isCover: false,
+    },
+    {
       projectId: draftProject.id,
-      cloudinaryAssetId: "demo-asset-draft",
-      cloudinaryPublicId: "075arquitectura/demo/draft",
-      cloudinaryVersion: 1n,
-      secureUrl: "https://example.invalid/cloudinary/draft.jpg",
-      format: "jpg",
+      storageKind: MediaStorageKind.BUNDLED,
+      storageKey: "/images/concept/stair-interior-demo.webp",
+      originalFilename: "stair-interior-demo.webp",
+      originalFormat: "webp",
+      originalSha256: null,
+      displayFormat: "webp",
+      variants: [],
       width: 1200,
       height: 900,
-      bytes: 190000n,
+      originalBytes: 190000n,
       altText: null,
       position: 0,
       isCover: false,
     },
     {
       projectId: deletedProject.id,
-      cloudinaryAssetId: "demo-asset-deleted-cover",
-      cloudinaryPublicId: "075arquitectura/demo/deleted-cover",
-      cloudinaryVersion: 1n,
-      secureUrl: "https://example.invalid/cloudinary/deleted-cover.jpg",
-      format: "jpg",
+      storageKind: MediaStorageKind.BUNDLED,
+      storageKey: "/images/concept/courtyard-house-demo.webp",
+      originalFilename: "courtyard-house-demo.webp",
+      originalFormat: "webp",
+      originalSha256: null,
+      displayFormat: "webp",
+      variants: [],
       width: 1400,
       height: 1000,
-      bytes: 220000n,
+      originalBytes: 220000n,
       altText: "Portada ficticia de un proyecto en papelera.",
       position: 0,
       isCover: true,
@@ -215,7 +359,12 @@ export async function seedDatabase(
 
   for (const image of images) {
     await database.projectImage.upsert({
-      where: { cloudinaryAssetId: image.cloudinaryAssetId },
+      where: {
+        projectId_position: {
+          projectId: image.projectId,
+          position: image.position,
+        },
+      },
       update: image,
       create: image,
     });
@@ -224,6 +373,9 @@ export async function seedDatabase(
   if (options.mode === "test") {
     const passwordHash = await argon2.hash("test-only-password-123!", {
       type: argon2.argon2id,
+      memoryCost: 19_456,
+      timeCost: 2,
+      parallelism: 1,
     });
 
     await database.adminUser.upsert({
