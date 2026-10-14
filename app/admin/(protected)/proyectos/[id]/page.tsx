@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
@@ -17,6 +18,16 @@ type ProjectEditorPageProps = {
   params: Promise<{ id: string }>;
   searchParams: Promise<{ estado?: string; paso?: string }>;
 };
+
+export async function generateMetadata({
+  params,
+}: ProjectEditorPageProps): Promise<Metadata> {
+  const { id } = await params;
+  const project = await getAdminProject(id);
+  return {
+    title: project ? `Editar: ${project.name}` : "Editar Proyecto",
+  };
+}
 
 const editorSteps = [
   { value: "informacion", label: "Información" },

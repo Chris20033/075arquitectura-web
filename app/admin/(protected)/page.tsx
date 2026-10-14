@@ -1,6 +1,11 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 
 import { getAdminDashboardData } from "@/lib/admin/dashboard";
+
+export const metadata: Metadata = {
+  title: "Inicio",
+};
 
 const dateFormatter = new Intl.DateTimeFormat("es-MX", {
   day: "2-digit",

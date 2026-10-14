@@ -1,8 +1,10 @@
 "use client";
 
 import {
+  createContext,
   useActionState,
   useCallback,
+  useContext,
   useEffect,
   useId,
   useRef,
@@ -15,6 +17,22 @@ import {
   initialAdminActionState,
   type AdminActionState,
 } from "@/lib/admin/content-result";
+
+export const AdminActionFormContext = createContext<{
+  state: AdminActionState;
+  pending: boolean;
+}>({ state: initialAdminActionState, pending: false });
+
+export function AdminFieldError({ name }: { name: string }) {
+  const { state } = useContext(AdminActionFormContext);
+  const error = state.fieldErrors?.[name];
+  if (!error) return null;
+  return (
+    <span className="admin-field__error" id={`${name}-error`} role="alert">
+      {error}
+    </span>
+  );
+}
 
 type AdminAction = (
   state: AdminActionState,
@@ -127,40 +145,46 @@ export function AdminActionForm({
   }, [resetOnSuccess, setDirty, state]);
 
   return (
-    <form
-      ref={formRef}
-      action={formAction}
-      className={className}
-      aria-busy={pending}
-      onInput={(event) => {
-        if (!trackChanges) return;
-        const signature = formSignature(event.currentTarget);
-        setDirty(signature !== baselineRef.current);
-      }}
-    >
-      <ActionFeedback state={state} />
-      {children}
-      <div className={trackChanges ? "admin-savebar" : undefined}>
-        {trackChanges ? (
-          <span aria-live="polite">
-            {pending
-              ? "Guardando…"
-              : dirty
-                ? "Cambios sin guardar"
-                : state.ok
-                  ? "Todo guardado"
-                  : "Sin cambios"}
-          </span>
-        ) : null}
-        <button
-          className="admin-button"
-          data-tone={tone}
-          type="submit"
-          disabled={pending || (trackChanges && !dirty)}
-        >
-          {pending ? pendingLabel : submitLabel}
-        </button>
-      </div>
-    </form>
+    <AdminActionFormContext.Provider value={{ state, pending }}>
+      <form
+        ref={formRef}
+        action={formAction}
+        className={className}
+        aria-busy={pending}
+        onInput={(event) => {
+          const target = event.target as HTMLElement | null;
+          if (target?.hasAttribute("aria-invalid")) {
+            target.removeAttribute("aria-invalid");
+          }
+          if (!trackChanges) return;
+          const signature = formSignature(event.currentTarget);
+          setDirty(signature !== baselineRef.current);
+        }}
+      >
+        <ActionFeedback state={state} />
+        {children}
+        <div className={trackChanges ? "admin-savebar" : undefined}>
+          {trackChanges ? (
+            <span aria-live="polite">
+              {pending
+                ? "Guardando…"
+                : dirty
+                  ? "Cambios sin guardar"
+                  : state.ok
+                    ? "Todo guardado"
+                    : "Sin cambios"}
+            </span>
+          ) : null}
+          <button
+            className="admin-button"
+            data-tone={tone}
+            type="submit"
+            disabled={pending || (trackChanges && !dirty)}
+          >
+            {pending ? pendingLabel : submitLabel}
+          </button>
+        </div>
+      </form>
+    </AdminActionFormContext.Provider>
   );
 }

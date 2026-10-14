@@ -1606,6 +1606,27 @@
   outline-offset: 3px;
 }
 
+.admin-field__error {
+  display: block;
+  font-size: 0.74rem;
+  font-weight: 550;
+  color: #713a2d;
+  line-height: 1.4;
+  margin-top: 0.25rem;
+  animation: admin-field-error-in 150ms ease both;
+}
+
+@keyframes admin-field-error-in {
+  from {
+    opacity: 0;
+    transform: translateY(-3px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .admin-recovery {
   display: grid;
   grid-template-columns: minmax(13rem, 0.42fr) minmax(0, 1fr);

@@ -83,11 +83,23 @@ export async function POST(request: NextRequest) {
     );
 
   const origin = request.headers.get("origin");
-  if (origin && origin !== request.nextUrl.origin)
-    return NextResponse.json(
-      { message: "Solicitud no permitida." },
-      { status: 403 },
-    );
+
+  if (origin) {
+    const forwardedHost = request.headers.get("x-forwarded-host");
+    const forwardedProto = request.headers.get("x-forwarded-proto");
+
+    const expectedOrigin =
+      forwardedHost && forwardedProto
+        ? `${forwardedProto}://${forwardedHost}`
+        : request.nextUrl.origin;
+
+    if (origin !== expectedOrigin) {
+      return NextResponse.json(
+        { message: "Solicitud no permitida." },
+        { status: 403 },
+      );
+    }
+  }
 
   const signed = request.headers.get("x-media-upload");
   if (!signed)
