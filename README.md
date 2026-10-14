@@ -14,12 +14,34 @@ A self-hosted, monolithic Next.js application delivering a high-end architectura
 
 ## Preview
 
+### Public Architectural Showcase
+
 <div align="center">
   <img src="docs/preview.png" alt="075arquitectura Public Portfolio Preview" width="100%" />
 </div>
 
 <p align="center">
   <em>Public architectural landing showcasing the custom editorial layout and responsive portfolio showcase.</em>
+</p>
+
+### Project Detail & Interactive Consent
+
+<div align="center">
+  <img src="docs/project-detail.png" alt="Project Detail View and Cookie Consent Banner" width="100%" />
+</div>
+
+<p align="center">
+  <em>Architectural project detail layout with integrated specs, responsive gallery, and privacy consent banner.</em>
+</p>
+
+### Private Editorial CMS Control Panel
+
+<div align="center">
+  <img src="docs/admin-preview.png" alt="Private CMS Control Panel Access" width="100%" />
+</div>
+
+<p align="center">
+  <em>Hardened administrative back-office access (<code>/admin/acceso</code>) with Argon2id session authentication.</em>
 </p>
 
 ---
