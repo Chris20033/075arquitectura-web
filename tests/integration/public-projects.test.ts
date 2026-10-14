@@ -125,6 +125,8 @@ describe("public project catalogue", () => {
       "https://075arquitectura.example/proyectos/casa-luz-demo",
       "https://075arquitectura.example/proyectos/patio-de-tierra-demo",
       "https://075arquitectura.example/proyectos/casa-umbral-demo",
+      "https://075arquitectura.example/privacidad",
+      "https://075arquitectura.example/terminos",
     ]);
     expect(JSON.stringify(sitemap)).not.toContain("borrador");
     expect(JSON.stringify(sitemap)).not.toContain("papelera");

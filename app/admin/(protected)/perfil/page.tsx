@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 
 import { AdminActionForm } from "@/components/admin/admin-action-form";
@@ -13,6 +14,10 @@ import {
   updateSocialLinkAction,
 } from "@/lib/admin/content-actions";
 import { getAdminProfile } from "@/lib/admin/content-queries";
+
+export const metadata: Metadata = {
+  title: "Perfil y Contacto",
+};
 import { normalizeSocialUrl } from "@/lib/public/contact";
 
 const sections = [

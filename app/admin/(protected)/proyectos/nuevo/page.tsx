@@ -1,8 +1,13 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 
 import { AdminActionForm } from "@/components/admin/admin-action-form";
 import { createProjectAction } from "@/lib/admin/content-actions";
 import { getAdminCategories } from "@/lib/admin/content-queries";
+
+export const metadata: Metadata = {
+  title: "Nuevo Proyecto",
+};
 
 export default async function NewProjectPage() {
   const categories = await getAdminCategories();

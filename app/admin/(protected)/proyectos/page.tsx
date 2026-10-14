@@ -1,8 +1,13 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 
 import { ReorderList } from "@/components/admin/reorder-list";
 import { reorderProjectsAction } from "@/lib/admin/content-actions";
 import { getAdminProjects } from "@/lib/admin/content-queries";
+
+export const metadata: Metadata = {
+  title: "Proyectos",
+};
 
 type ProjectsPageProps = {
   searchParams: Promise<{ estado?: string }>;

@@ -1,3 +1,4 @@
+import { CookieBanner } from "@/components/public/cookie-banner";
 import "./public.css";
 
 export default function PublicLayout({
@@ -5,5 +6,10 @@ export default function PublicLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return <div className="public-root">{children}</div>;
+  return (
+    <div className="public-root">
+      {children}
+      <CookieBanner />
+    </div>
+  );
 }
