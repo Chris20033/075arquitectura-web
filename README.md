@@ -34,6 +34,21 @@ A self-hosted, monolithic Next.js application delivering a high-end architectura
   <em>Architectural project detail layout with integrated specs, responsive gallery, and privacy consent banner.</em>
 </p>
 
+### Mobile Responsive Experience
+
+<table align="center" width="100%">
+  <tr>
+    <td align="center" width="50%" valign="top">
+      <img src="docs/mobile-preview.png" alt="Mobile Public Showcase" width="320" />
+      <p align="center"><em>Mobile landing showcase</em></p>
+    </td>
+    <td align="center" width="50%" valign="top">
+      <img src="docs/mobile-project-detail.png" alt="Mobile Project Detail View" width="320" />
+      <p align="center"><em>Mobile project detail view</em></p>
+    </td>
+  </tr>
+</table>
+
 ### Private Editorial CMS Control Panel
 
 <div align="center">
