@@ -1,9 +1,14 @@
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 
 import { getActiveAdminSession } from "@/lib/auth/access";
 import { sanitizeAdminCallback } from "@/lib/auth/callback-url";
 
 import { LoginForm } from "./login-form";
+
+export const metadata: Metadata = {
+  title: "Acceso al panel",
+};
 
 type LoginPageProps = {
   searchParams: Promise<{

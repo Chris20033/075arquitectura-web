@@ -1,9 +1,15 @@
+import type { Metadata } from "next";
+
 import { ConfirmDialog } from "@/components/admin/confirm-dialog";
 import {
   permanentlyDeleteProjectAction,
   restoreProjectAction,
 } from "@/lib/admin/content-actions";
 import { getAdminTrash } from "@/lib/admin/content-queries";
+
+export const metadata: Metadata = {
+  title: "Papelera",
+};
 
 export default async function TrashPage() {
   const projects = await getAdminTrash();

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { connection } from "next/server";
 
 import { ProjectImage } from "@/components/public/project-image";
+import { PublicFooter } from "@/components/public/public-footer";
 import { PublicProjectArchive } from "@/components/public/public-project-archive";
 import { PublicNavigation } from "@/components/public/public-navigation";
 import { SocialNetworkIcon } from "@/components/public/social-network-icon";
@@ -348,11 +349,7 @@ export default async function Home() {
         </section>
       </main>
 
-      <footer className="public-footer">
-        <span>075arquitectura</span>
-        <span>© {new Date().getFullYear()}</span>
-        <a href="#inicio">Volver arriba</a>
-      </footer>
+      <PublicFooter actionLink={{ href: "#inicio", label: "Volver arriba" }} />
     </>
   );
 }

@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 
 import { AdminActionForm } from "@/components/admin/admin-action-form";
@@ -10,6 +11,10 @@ import {
   updateCategoryAction,
 } from "@/lib/admin/content-actions";
 import { getAdminCategories } from "@/lib/admin/content-queries";
+
+export const metadata: Metadata = {
+  title: "Categorías",
+};
 
 export default async function CategoriesPage() {
   const categories = await getAdminCategories();

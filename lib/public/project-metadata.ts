@@ -63,6 +63,16 @@ export function buildPublicSitemap(siteUrl: URL, slugs: string[]) {
       changeFrequency: "monthly" as const,
       priority: 0.8,
     })),
+    {
+      url: new URL("/privacidad", siteUrl).toString(),
+      changeFrequency: "yearly" as const,
+      priority: 0.3,
+    },
+    {
+      url: new URL("/terminos", siteUrl).toString(),
+      changeFrequency: "yearly" as const,
+      priority: 0.3,
+    },
   );
 
   return entries;

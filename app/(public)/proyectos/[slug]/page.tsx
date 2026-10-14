@@ -6,6 +6,7 @@ import { cache } from "react";
 
 import { ProjectImage } from "@/components/public/project-image";
 import { ProjectGallery } from "@/components/public/project-gallery";
+import { PublicFooter } from "@/components/public/public-footer";
 import { PublicNavigation } from "@/components/public/public-navigation";
 import { getContentMode } from "@/lib/public/landing";
 import { buildProjectMetadata } from "@/lib/public/project-metadata";
@@ -110,11 +111,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
         </nav>
       </main>
 
-      <footer className="public-footer">
-        <span>075arquitectura</span>
-        <span>© {new Date().getFullYear()}</span>
-        <Link href="/#proyectos">Archivo</Link>
-      </footer>
+      <PublicFooter actionLink={{ href: "/#proyectos", label: "Archivo" }} />
     </>
   );
 }
